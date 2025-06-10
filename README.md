@@ -1,4 +1,4 @@
-# SuccessRiver AcademicCareerChart (Improved Edition)
+# SuccessRiver AcademicCareerChart
 
 ## 概要
 
