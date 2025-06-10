@@ -1,25 +1,131 @@
-# SuccessRiver AcademicCareerChart
+# SuccessRiver AcademicCareerChart (Improved Edition)
 
-## Overview
-｢SuccessRiver AcademicCareerChart｣は、<a href="https://twitter.com/rei_nari">@rei_nari</a>さん考案のキャリアイベント図をresearchmapに登録された情報から生成します。
+## 概要
 
-Githubリポジトリ： <a href="https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS">https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS</a>
+「SuccessRiver AcademicCareerChart」は、[@rei_nari](https://twitter.com/rei_nari)さん考案のキャリアイベント図をresearchmapに登録された情報から自動生成するツールです。
 
-作者情報： 松田裕貴（<a href="https://twitter.com/yukimatJP">@yukimatJP</a>）
+本プロジェクトは、[松田裕貴さん(@yukimatJP)](https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS)のオリジナル版をフォークし、ユーザビリティとアクセシビリティを大幅に改善した改良版です。
 
-<img width="1539" alt="SuccessRiverAcademicCareerChart" src="https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS/assets/3212917/09d336cb-0779-4006-9f15-033e0d36d399">
+## 主な機能
 
-## Try it now
-<a href="https://career-chart.yukimat.jp/">https://career-chart.yukimat.jp/</a> にて公開していますので、お試しいただけます。
-<div><video controls src="https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS/assets/3212917/fa29852c-199e-41d8-b437-c57c4b107d4c" muted="true"></video></div>
+### 📊 **キャリア可視化**
+- **論文発表実績**: 筆頭著者・責任著者・共著者の区分を4色で表示
+- **研究費獲得状況**: 代表研究者・分担研究者の区分と助成機関情報
+- **学歴・職歴**: 時系列での所属変遷（所属機関・部署・職種を詳細表示）
+- **時系列表示**: 年単位での一覧性の高いタイムライン
 
-## Release Note
+### 🎨 **アクセシビリティ対応**
+- **カラーブラインドセーフ**: 色覚障害者でも区別しやすい色設計
+- **ツールチップ表示**: 長いテキストでもホバーで全文確認可能
 
-- 2023/08/20 (v1.2.1)  
-  英語表記のみの学歴・職歴・予算への対応、年月日の設定のないデータに対するエラーハンドリング。
-- 2023/08/20 (v1.2)  
-  埋め込みコードと印刷表示に対応。
-- 2023/08/20 (v1.1)  
-  生成したチャートをURLとして共有できるようになりました。なお、ロングキャリアの研究者はURLが長くなりすぎて文字数制限の問題が生じるかもしれません。
-- 2023/08/19（v1.0）  
-  本システムは週末ひとりハッカソンの成果のため、対応していない部分が多々あります（そもそも、自分のresearchmapの使い方が間違えてる部分もありそう）。予算や学歴・職歴のラベルに関してはもう少しいい感じにしたいところです。
+### 🔧 **埋め込み・共有機能**
+- **iframe埋め込み**: 相対パス対応でプライバシー保護
+- **スタンドアロンHTML**: 完全独立型の軽量チャート生成
+- **印刷モード**: 印刷に最適化された表示
+
+### ⚙️ **表示カスタマイズ**
+- **幅調整**: チャートの横幅をスライダーで調整
+- **項目選択**: 論文種別・予算表示の個別ON/OFF
+- **動的更新**: 設定変更の即時反映
+
+## オリジナルからの主な改善点
+
+### 🔍 **表示問題の解決**
+- **テキスト見切れ修正**: 予算獲得状況と学歴・職歴で長いテキストが切れる問題を解決
+- **同期間複数項目対応**: 同じ時期の複数所属で文字が表示されない問題を修正
+
+### 🎨 **視覚的改善**
+- **4種類の著者タイプ色分け**: 筆頭著者かつ責任著者・筆頭著者・責任著者・共著者を明確に区別
+- **カラーブラインドセーフカラー**: 識別可能な色選択
+- **凡例追加**: 各色の意味を明示する分かりやすい凡例
+
+### 📋 **情報表示の充実**
+- **学歴・職歴詳細化**: 所属機関・部署・職種を全て表示
+- **研究費詳細化**: 助成機関・カテゴリを全て表示
+
+### 🔒 **プライバシー・セキュリティ強化**
+- **ローカルパス保護**: 埋め込みコードからローカルファイルパス情報を除去
+- **相対パス対応**: より安全で汎用性の高い埋め込みコード生成
+
+### 🚀 **新機能追加**
+- **スタンドアロンHTML生成**: 依存関係なしの完全独立型チャート
+- **ダウンロード機能**: チャートを単体HTMLファイルとして保存可能
+- **ホバー拡張表示**: 文字切れ箇所のマウスオーバーで詳細表示
+
+## インストール・使用方法
+
+### 1. **researchmapデータの準備**
+1. [researchmap](https://researchmap.jp/)にログイン
+2. 「データのエクスポート」からJSONL形式でデータをダウンロード
+3. ダウンロードしたJSONLファイルを用意
+
+### 2. **実行**
+1. `career-chart.html`をブラウザで開く
+2. 「ファイルを選択」からJSONLファイルを選択
+3. チャートが自動生成される
+
+### 3. **設定調整**
+- **表示横幅**: スライダーでチャート幅を調整
+- **表示項目**: 論文種別や予算項目の表示/非表示を切り替え
+
+### 4. **埋め込み・共有**
+- **埋め込みコード取得**: iframe形式で他サイトに埋め込み
+- **スタンドアロンHTML生成**: 独立したHTMLファイルをダウンロード
+- **印刷モード**: 印刷に適した表示で別ウィンドウオープン
+
+## 対応ブラウザ
+
+- ✅ Chrome (推奨)
+- ✅ Firefox
+- ✅ Safari
+- ✅ Edge
+- ✅ モバイルブラウザ
+
+## ファイル構成
+
+```
+career-chart.html          # メインアプリケーション
+README.md                  # このファイル
+screenshot.png            # サンプル画像（オプション）
+```
+
+## 色分け仕様
+
+| 著者タイプ | 色 | 重要度 |
+|---|---|---|
+| 筆頭著者かつ責任著者 | 🔴 濃い赤 (#d73027) | 最高 |
+| 筆頭著者のみ | 🟠 オレンジ (#fc8d62) | 高 |
+| 責任著者のみ | 🔵 青 (#8da0cb) | 中 |
+| その他共著者 | 🟣 薄いピンク (#e78ac3) | 低 |
+
+## クレジット・謝辞
+
+- **オリジナル開発者**: [松田裕貴](https://github.com/yukimatJP) ([@yukimatJP](https://twitter.com/yukimatJP))
+- **キャリアイベント図考案**: [@rei_nari](https://twitter.com/rei_nari)さん
+- **改良版開発**: [多田塁：Rui Tada]
+
+### オリジナルプロジェクト
+[SuccessRiverAcademicCareerChartJS](https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS) by 松田裕貴さん
+
+## 更新履歴
+
+### v1.0.1 (2025/06/10)
+- URL共有機能を削除、埋め込み機能に集約してシンプル化
+
+### v1.0.0 (2025/06/10)
+- フォーク版初回リリース
+- カラーブラインドセーフな色分け実装
+- テキスト見切れ問題の解決
+- 学歴・職歴・予算情報の表示改善
+- プライバシー配慮の埋め込み機能
+- スタンドアロンHTML生成機能
+
+## 関連リンク
+
+- [researchmap](https://researchmap.jp/) - 研究者情報データベース
+- [オリジナル版デモサイト](https://career-chart.yukimat.jp/) - 松田裕貴さんのオリジナル版
+- [@rei_nariさんの元ツイート](https://twitter.com/rei_nari/status/1691102017153114112) - キャリアイベント図の考案元
+
+---
+
+**改良版 SuccessRiver AcademicCareerChart** - より使いやすく、より美しく、より包括的に。
