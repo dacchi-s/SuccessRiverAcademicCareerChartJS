@@ -217,10 +217,11 @@ section.career-chart-container {
   align-self: flex-end;
 }
 
-.achievement-cell.item-first-and-corresp { background: #d73027; } /* 濃い赤 - 筆頭かつ責任著者（最重要） */
-.achievement-cell.item-first-only { background: #fc8d62; }       /* オレンジ - 筆頭著者のみ（2番目に重要） */
-.achievement-cell.item-corresp-only { background: #8da0cb; }     /* 青 - 責任著者のみ（3番目に重要） */
-.achievement-cell.item-other { background: #e78ac3; }            /* 薄いピンク - その他共著者（最軽微） */
+/* カラーブラインドセーフな著者タイプの色分け */
+.achievement-cell.item-first-and-corresp { background: #d73027; } /* 濃い赤 - 筆頭かつ責任著者 */
+.achievement-cell.item-first-only { background: #fc8d62; }       /* オレンジ - 筆頭著者のみ */
+.achievement-cell.item-corresp-only { background: #8da0cb; }     /* 青 - 責任著者のみ */
+.achievement-cell.item-other { background: #e78ac3; }            /* 薄いピンク - その他共著者 */
 
 .grant-row,
 .edujob-row {
@@ -229,6 +230,7 @@ section.career-chart-container {
   height: 30px;
 }
 
+/* テキスト見切れためのCSS */
 .grant-cell,
 .edujob-cell {
   position: absolute;
@@ -242,6 +244,15 @@ section.career-chart-container {
   border-width: 0 0 5px;
   overflow: hidden;
   transition: all 0.2s ease;
+}
+
+/* 常時表示モード用のスタイル */
+.app[data-text-mode="always"] .grant-cell,
+.app[data-text-mode="always"] .edujob-cell {
+  height: auto;
+  min-height: 25px;
+  padding: 2px 0 5px;
+  overflow: visible;
 }
 
 .grant-cell.isPI      { border-color: #4ea24e; }
@@ -262,16 +273,29 @@ section.career-chart-container {
   padding: 0 4px;
 }
 
-.grant-cell:hover,
-.edujob-cell:hover {
+/* 常時表示モード用のテキストスタイル */
+.app[data-text-mode="always"] .grant-cell span,
+.app[data-text-mode="always"] .edujob-cell span {
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
+  text-overflow: unset;
+  align-self: flex-start;
+  line-height: 1.2;
+  padding: 2px 4px;
+}
+
+/* ホバー時のスタイル */
+.app[data-text-mode="hover"] .grant-cell:hover,
+.app[data-text-mode="hover"] .edujob-cell:hover {
   z-index: 10;
   overflow: visible;
   background-color: rgba(255, 255, 255, 0.98);
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.grant-cell:hover span,
-.edujob-cell:hover span {
+.app[data-text-mode="hover"] .grant-cell:hover span,
+.app[data-text-mode="hover"] .edujob-cell:hover span {
   white-space: normal;
   word-break: break-word;
   position: absolute;
@@ -285,6 +309,7 @@ section.career-chart-container {
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
+/* 凡例のスタイル */
 .achievement-legend {
   padding: 5px 10px;
   margin: 5px 0 10px;
@@ -419,7 +444,7 @@ footer .content {
 }
 
 </style>
-<div class="app" id="app" :class="{embed: isEmbeddingMode, print:isPrintingMode}">
+<div class="app" id="app" :class="{embed: isEmbeddingMode, print:isPrintingMode}" :data-text-mode="chart.settings.textDisplayMode">>
 <header class="clearfix">
   <h1>SuccessRiver AcademicCareerChart (${ systemVersion })</h1>
   <nav>
@@ -477,6 +502,24 @@ footer .content {
                  @change="replotCareerHistory">
           <label for="disp-setting-grants-notPI">代表研究者以外の予算</label>
         </li>
+      </ul>
+    </dd>
+    <dt>テキスト表示</dt>
+    <dd>
+      <ul class="clearfix">
+        <li>
+          <input type="radio" id="text-display-hover" value="hover"
+                 v-model="chart.settings.textDisplayMode"
+                 @change="updateTextDisplayMode">
+          <label for="text-display-hover">ホバー時のみ表示</label>
+        </li>
+        <li>
+          <input type="radio" id="text-display-always" value="always"
+                 v-model="chart.settings.textDisplayMode"
+                 @change="updateTextDisplayMode">
+          <label for="text-display-always">常時表示</label>
+        </li>
+      </ul>
     </dd>
   </dl>
 </section>
@@ -492,6 +535,7 @@ footer .content {
         </h3>
       </div>
       <div class="achievement-chart">
+        <!-- 論文著者タイプの凡例を追加 -->
         <div class="achievement-legend clearfix">
           <div class="legend-item">
             <span class="legend-color item-first-and-corresp"></span>
@@ -582,19 +626,25 @@ footer .content {
       「SuccessRiver AcademicCareerChart (${ systemVersion })」は、<a href="https://twitter.com/rei_nari">@rei_nari</a>さん考案のキャリアイベント図をresearchmapに登録された情報から生成します。
     </p>
     <p>
-      オリジナル： <a href="https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS">https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS</a> by 松田裕貴（<a href="https://twitter.com/yukimatJP">@yukimatJP</a>）さんをフォークして作りました。
+      オリジナル： <a href="https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS">https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS</a> by 松田裕貴（<a href="https://twitter.com/yukimatJP">@yukimatJP</a>）をフォークして作りました。
     </p>
     <p>
       Githubリポジトリ： <a href="https://github.com/dacchi-s/SuccessRiverAcademicCareerChartJS">https://github.com/dacchi-s/SuccessRiverAcademicCareerChartJS</a>
     </p>
     <p>
-      作者情報： 多田 塁：Rui Tada
+      作者情報： 多田 塁（Rui Tada）
     </p>
     <h2>◇ リリースノート</h2>
     <ul class="release-note">
       <li>
+        2025/06/11 (v1.0.3)<br>
+        動的高さ調整ロジック実装。テキストを短縮せず、横幅と文字数から必要な縦幅を自動計算。
+      <li>
+        2025/06/11 (v1.0.2)<br>
+        常時表示モードの重複問題を改善。テキスト短縮機能追加、行間調整を実装。
+      <li>
         2025/06/10 (v1.0.1)<br>
-        URL共有機能を削除。埋め込み機能に集約してシンプル化。
+        URL共有機能を削除。埋め込み機能に集約。
       <li>
         2025/06/10 (v1.0.0)<br>
         リリースしました。
@@ -659,7 +709,8 @@ var app = new Vue({
           intlConf:     true,
           domesticConf: true,
           notPIgrants:  true,
-        }
+        },
+        textDisplayMode: 'hover'
       },
       educationsAndJobs: [],
       grants: [],
@@ -727,7 +778,7 @@ var app = new Vue({
         let edu = this.rmJson.education[i];
         let yearFrom = this.getFinancialYear(edu.from_date);
         let yearTo   = this.getFinancialYear(edu.to_date);
-        let eduName  = this.getEduName(edu); // edu全体を渡すように修正
+        let eduName  = this.getEduName(edu);
         this.career.educationsAndJobs.push({'yearFrom': yearFrom, 'yearTo': yearTo, 'name': eduName, 'isEdu': true});
         this.updateCareerPeriod(yearFrom.year, yearTo.year);
       }
@@ -807,6 +858,7 @@ var app = new Vue({
     getEduName(edu) {
       let parts = [];
       
+      // affiliation（所属機関）を追加
       if('affiliation' in edu) {
         if(edu.affiliation.ja) {
           parts.push(edu.affiliation.ja);
@@ -815,6 +867,7 @@ var app = new Vue({
         }
       }
       
+      // department（学部・研究科等）を追加
       if('department' in edu) {
         if(edu.department.ja) {
           parts.push(edu.department.ja);
@@ -823,6 +876,7 @@ var app = new Vue({
         }
       }
       
+      // course（専攻・課程等）を追加
       if('course' in edu) {
         if(edu.course.ja) {
           parts.push(edu.course.ja);
@@ -833,6 +887,7 @@ var app = new Vue({
       
       let eduName = parts.join(' ');
       
+      // 課程判定ロジック（日本語要素が含まれている場合のみ）
       if(eduName && (
           (edu.affiliation && edu.affiliation.ja) || 
           (edu.department && edu.department.ja) || 
@@ -863,20 +918,24 @@ var app = new Vue({
       let parts = [];
       let lang = ('ja' in job.affiliation || ('job' in job && 'ja' in job.job)) ? 'ja' : 'en';
       
+      // affiliation（所属機関）を追加
       if('affiliation' in job && job.affiliation[lang]) {
         parts.push(job.affiliation[lang]);
       }
       
+      // section（部署・学科等）を追加
       if('section' in job && job.section[lang]) {
         parts.push(job.section[lang]);
       }
       
+      // job（職種）を追加
       if('job' in job && job.job[lang]) {
         parts.push(job.job[lang]);
       }
       
       let jobName = parts.join(' ');
       
+      // 日本学術振興会の場合の特別処理
       if(jobName.includes("日本学術振興会")) {
         jobName = jobName.includes("DC1") ? "学振DC1"
                 : jobName.includes("DC2") ? "学振DC2"
@@ -891,18 +950,21 @@ var app = new Vue({
       let parts = [];
       let lang = 'ja';
       
+      // offer_organization（助成機関）を追加
       if('offer_organization' in grant && grant.offer_organization[lang]) {
         parts.push(grant.offer_organization[lang]);
       } else if('offer_organization' in grant && grant.offer_organization['en']) {
         parts.push(grant.offer_organization['en']);
       }
       
+      // category（カテゴリ）を追加
       if('category' in grant && grant.category[lang]) {
         parts.push(grant.category[lang]);
       } else if('category' in grant && grant.category['en']) {
         parts.push(grant.category['en']);
       }
       
+      // system_name（制度名）を追加（categoryがない場合の代替）
       if(parts.length === 0 || (parts.length === 1 && 'system_name' in grant)) {
         if('system_name' in grant && grant.system_name[lang]) {
           parts.push(grant.system_name[lang]);
@@ -911,7 +973,8 @@ var app = new Vue({
         }
       }
       
-      parts = [...new Set(parts)];
+      // 重複を除去して結合
+      parts = [...new Set(parts)]; // 重複除去
       return parts.length > 0 ? parts.join('・') : 'その他の研究費';
     },
     plotCareerHistory() {
@@ -931,17 +994,22 @@ var app = new Vue({
             let row = this.chart.educationsAndJobs[j];
             let canPlaceInRow = true;
             
+            // この行の全ての項目と重複チェック
             for(let k=0; k<row.length; k++) {
               if(!(newItem.to <= row[k].from || newItem.from >= row[k].to)) {
+                // 重複がある場合はこの行には配置できない
                 canPlaceInRow = false;
                 break;
               }
             }
             
             if(canPlaceInRow) {
+              // この行に配置可能
               if(newItem.to <= row[0].from) {
+                // 行の最初に挿入
                 row.unshift(newItem);
               } else {
+                // 行の最後に追加
                 row.push(newItem);
               }
               placed = true;
@@ -949,6 +1017,7 @@ var app = new Vue({
             }
           }
           
+          // どの行にも配置できない場合は新しい行を作成
           if(!placed) {
             this.chart.educationsAndJobs.push([newItem]);
           }
@@ -969,17 +1038,22 @@ var app = new Vue({
               let row = this.chart.grants[j];
               let canPlaceInRow = true;
               
+              // この行の全ての項目と重複チェック
               for(let k=0; k<row.length; k++) {
                 if(!(newItem.to <= row[k].from || newItem.from >= row[k].to)) {
+                  // 重複がある場合はこの行には配置できない
                   canPlaceInRow = false;
                   break;
                 }
               }
               
               if(canPlaceInRow) {
+                // この行に配置可能
                 if(newItem.to <= row[0].from) {
+                  // 行の最初に挿入
                   row.unshift(newItem);
                 } else {
+                  // 行の最後に追加
                   row.push(newItem);
                 }
                 placed = true;
@@ -987,13 +1061,14 @@ var app = new Vue({
               }
             }
             
+            // どの行にも配置できない場合は新しい行を作成
             if(!placed) {
               this.chart.grants.push([newItem]);
             }
           }
         }
       }
-      // Achievement History (paper)
+      // Achievement History (paper) - 論文著者タイプの区分を4種類に変更
       for(let achvmntType of this.achievementTypeList) {
         this.chart.achievements[achvmntType] = {};
         for(let i=this.chart.firstYear; i<=this.chart.latestYear; i++) {
@@ -1017,6 +1092,13 @@ var app = new Vue({
           }
         }
       }
+      
+      // 常時表示モードの場合は動的高さ計算
+      if (this.chart.settings.textDisplayMode === 'always') {
+        this.$nextTick(() => {
+          this.calculateDynamicHeights();
+        });
+      }
     },
     replotCareerHistory() {
       // reset plot data
@@ -1028,6 +1110,13 @@ var app = new Vue({
               domesticConf: [],
             };
       this.plotCareerHistory();
+      
+      // 常時表示モードの場合は動的高さ計算
+      if (this.chart.settings.textDisplayMode === 'always') {
+        this.$nextTick(() => {
+          this.calculateDynamicHeights();
+        });
+      }
     },
     getEducationAndJobItem(item) {
       return {
@@ -1050,6 +1139,133 @@ var app = new Vue({
       root.style.setProperty('--col-width', this.chart.settings.cellWidth + "px");
       root.style.setProperty('--row-width', this.chart.settings.cellWidth * (4 + this.chart.latestYear - this.chart.firstYear) + "px");
     },
+    
+    // テキスト表示モード変更
+    updateTextDisplayMode() {
+      if(this.chart.settings.textDisplayMode === 'always') {
+        this.$nextTick(() => {
+          this.calculateDynamicHeights();
+          console.log('テキスト表示モード: 常時表示 - 動的高さ調整');
+        });
+      } else {
+        // ホバーモードに戻す際は動的高さをリセット
+        this.$nextTick(() => {
+          this.resetDynamicHeights();
+          console.log('テキスト表示モード: ホバー時のみ - 高さリセット');
+        });
+      }
+    },
+    
+    // 動的高さをリセット（ホバーモード用）
+    resetDynamicHeights() {
+      // 予算獲得状況のリセット
+      const grantRows = document.querySelectorAll('.grant-row');
+      grantRows.forEach(row => {
+        row.style.height = '';
+        row.style.marginBottom = '';
+        const cells = row.querySelectorAll('.grant-cell');
+        cells.forEach(cell => {
+          cell.style.height = '';
+        });
+      });
+      
+      // 学歴・職歴のリセット
+      const eduJobRows = document.querySelectorAll('.edujob-row');
+      eduJobRows.forEach(row => {
+        row.style.height = '';
+        row.style.marginBottom = '';
+        const cells = row.querySelectorAll('.edujob-cell');
+        cells.forEach(cell => {
+          cell.style.height = '';
+        });
+      });
+    },
+    
+    // 動的高さ計算
+    calculateDynamicHeights() {
+      if (this.chart.settings.textDisplayMode !== 'always') return;
+      
+      // すべてのセルに対して高さを計算
+      this.$nextTick(() => {
+        this.adjustGrantCellHeights();
+        this.adjustEduJobCellHeights();
+      });
+    },
+    
+    // 予算セルの高さ調整
+    adjustGrantCellHeights() {
+      const rows = document.querySelectorAll('.grant-row');
+      rows.forEach((row, rowIndex) => {
+        let maxHeight = 25; // 最小高さ
+        const cells = row.querySelectorAll('.grant-cell');
+        
+        cells.forEach(cell => {
+          const span = cell.querySelector('span');
+          if (span) {
+            const textHeight = this.calculateTextHeight(span.textContent, cell.offsetWidth);
+            maxHeight = Math.max(maxHeight, textHeight + 10); // パディング追加
+          }
+        });
+        
+        // 行の高さを設定
+        row.style.height = maxHeight + 'px';
+        row.style.marginBottom = Math.max(15, maxHeight * 0.3) + 'px';
+        
+        // セルの高さも調整
+        cells.forEach(cell => {
+          cell.style.height = maxHeight + 'px';
+        });
+      });
+    },
+    
+    // 学歴職歴セルの高さ調整
+    adjustEduJobCellHeights() {
+      const rows = document.querySelectorAll('.edujob-row');
+      rows.forEach((row, rowIndex) => {
+        let maxHeight = 25; // 最小高さ
+        const cells = row.querySelectorAll('.edujob-cell');
+        
+        cells.forEach(cell => {
+          const span = cell.querySelector('span');
+          if (span) {
+            const textHeight = this.calculateTextHeight(span.textContent, cell.offsetWidth);
+            maxHeight = Math.max(maxHeight, textHeight + 10); // パディング追加
+          }
+        });
+        
+        // 行の高さを設定
+        row.style.height = maxHeight + 'px';
+        row.style.marginBottom = Math.max(15, maxHeight * 0.3) + 'px';
+        
+        // セルの高さも調整
+        cells.forEach(cell => {
+          cell.style.height = maxHeight + 'px';
+        });
+      });
+    },
+    
+    // テキストの高さを計算
+    calculateTextHeight(text, containerWidth) {
+      if (!text || !containerWidth) return 25;
+      
+      // 一時的な要素を作成してテキストの高さを測定
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.visibility = 'hidden';
+      tempDiv.style.width = (containerWidth - 8) + 'px'; // パディング分を差し引く
+      tempDiv.style.fontSize = '0.8em';
+      tempDiv.style.lineHeight = '1.2';
+      tempDiv.style.fontFamily = 'sans-serif';
+      tempDiv.style.wordBreak = 'break-word';
+      tempDiv.style.whiteSpace = 'normal';
+      tempDiv.textContent = text;
+      
+      document.body.appendChild(tempDiv);
+      const height = tempDiv.offsetHeight;
+      document.body.removeChild(tempDiv);
+      
+      return Math.max(25, height);
+    },
     onScrollChart(e) {
       let root = document.documentElement;
       root.style.setProperty('--chart-header-position', e.target.scrollLeft + "px");
@@ -1067,6 +1283,7 @@ var app = new Vue({
         left: (this.chart.settings.cellWidth * (item.from - this.chart.firstYear)) + 'px'
       };
     },
+    // ローカル環境対応のURL生成処理
     exportChart() {
       let eaj = [];
       for(let i=0; i<this.chart.educationsAndJobs.length; i++) {
@@ -1101,6 +1318,7 @@ var app = new Vue({
         let tmp = [];
         for(let i=this.chart.firstYear; i<=this.chart.latestYear; i++) {
           let val = this.chart.achievements[type][String(i)];
+          // 著者タイプの新しい区分に対応するエクスポート処理
           let firstAndCorresp = val.filter(e => e == 3).length;
           let firstOnly = val.filter(e => e == 2).length;
           let correspOnly = val.filter(e => e == 1).length;
@@ -1123,23 +1341,29 @@ var app = new Vue({
         Number(this.chart.settings.visibility.intlConf),
         Number(this.chart.settings.visibility.domesticConf),
         Number(this.chart.settings.visibility.notPIgrants),
+        this.chart.settings.textDisplayMode,
+        this.chart.settings.textDisplayMode,
         // chart
         encodeURI(eaj),
         encodeURI(grants),
         encodeURI(achvmnt)
       ];
+      // ローカル環境対応のURL生成
       this.exportedChartURL = window.location.origin + window.location.pathname + '?chart=' + expJson.join('...');
       setTimeout(() => {
         $('exported-chart-url').select();
         document.execCommand('copy');
       }, 100);
     },
+    // ローカル環境対応のシェア機能
     shareChartToX() {
       this.exportChart();
       let url = encodeURI('https://twitter.com/intent/tweet?text=サクセスリバー式キャリアチャートを作ってみたよ！\n→ ' + this.exportedChartURL + '\n\n@yukimatJP&hashtags=SuccessRiverAcademicCareerChartJS,サクセスリバー式キャリアチャート');
       window.open(url, "_blank");
     },
+    // プライバシー配慮の埋め込みコード生成
     embedChart() {
+      // チャートデータの変換（exportChartから移動）
       let eaj = [];
       for(let i=0; i<this.chart.educationsAndJobs.length; i++) {
         let tmp = [];
@@ -1200,6 +1424,7 @@ var app = new Vue({
       let ww = $("career-chart-wrap").offsetWidth + 130;
       let wh = $("career-chart-wrap").offsetHeight + 60;
       
+      // ファイル名のみを使用
       let fileName = window.location.pathname.split('/').pop() || 'career-chart.html';
       let chartParams = expJson.join('...');
       
@@ -1210,9 +1435,12 @@ var app = new Vue({
         document.execCommand('copy');
       }, 100);
     },
+    // ローカル環境対応の印刷モード
+    // スタンドアロン埋め込み用HTML生成
     generateStandaloneEmbed() {
       let standaloneHTML = this.createStandaloneEmbedHTML();
       
+      // Blobを作成してダウンロード
       let blob = new Blob([standaloneHTML], { type: 'text/html' });
       let url = URL.createObjectURL(blob);
       let a = document.createElement('a');
@@ -1223,6 +1451,7 @@ var app = new Vue({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
+      // テキストエリアにも表示
       this.exportedChartURL = '<!-- スタンドアロン埋め込み用HTMLファイルがダウンロードされました -->\n<iframe src="career-chart-embed.html" width="' + 
                              ($("career-chart-wrap").offsetWidth + 130) + '" height="' + 
                              ($("career-chart-wrap").offsetHeight + 60) + '" title="研究キャリアチャート"></iframe>';
@@ -1232,6 +1461,7 @@ var app = new Vue({
       }, 100);
     },
     
+    // スタンドアロンHTML作成
     createStandaloneEmbedHTML() {
       return `<!DOCTYPE html>
 <html lang="ja">
@@ -1303,6 +1533,7 @@ var app = new Vue({
 </html>`;
     },
     
+    // 業績セクションのHTML生成
     generateAchievementSectionsHTML() {
       let html = '';
       for (let type of this.achievementTypeList) {
@@ -1311,6 +1542,7 @@ var app = new Vue({
         let total = 0;
         let counts = { 3: 0, 2: 0, 1: 0, 0: 0 };
         
+        // 各年の実績を集計
         for (let year = this.chart.firstYear; year <= this.chart.latestYear; year++) {
           if (this.chart.achievements[type][year]) {
             this.chart.achievements[type][year].forEach(item => {
@@ -1322,6 +1554,7 @@ var app = new Vue({
         
         if (total === 0) continue;
         
+        // パーセンテージ計算
         let percentages = {
           3: (counts[3] / total * 100),
           2: (counts[2] / total * 100),
@@ -1349,7 +1582,9 @@ var app = new Vue({
       return html;
     },
     
+    // 印刷モード
     printChart() {
+      // チャートデータの変換
       let eaj = [];
       for(let i=0; i<this.chart.educationsAndJobs.length; i++) {
         let tmp = [];
@@ -1421,8 +1656,9 @@ var app = new Vue({
       this.chart.settings.visibility.intlConf = Boolean(parseInt(d[6]));
       this.chart.settings.visibility.domesticConf = Boolean(parseInt(d[7]));
       this.chart.settings.visibility.notPIgrants = Boolean(parseInt(d[8]));
+      this.chart.settings.textDisplayMode = d[9] || 'hover';
       // Education and Job History
-      let eaj = JSON.parse("[" + d[9].replaceAll('__', '"') + "]");
+      let eaj = JSON.parse("[" + d[10].replaceAll('__', '"') + "]");
       for(let i=0; i<parseInt(eaj.length/4); i++) {
         let eajItem = []
         let tmp = parseFloat(eaj[i*4]);
@@ -1440,7 +1676,7 @@ var app = new Vue({
         this.career.educationsAndJobs.push({'yearFrom': yearFrom, 'yearTo': yearTo, 'name': eduName, 'isEdu': isEdu});
       }
       // Grant History
-      let grant = JSON.parse("[" + d[10].replaceAll('__', '"') + "]");
+      let grant = JSON.parse("[" + d[11].replaceAll('__', '"') + "]");
       for(let i=0; i<parseInt(grant.length/4); i++) {
         let grantItem = []
         let tmp = parseFloat(grant[i*4]);
@@ -1457,7 +1693,8 @@ var app = new Vue({
         let isPI      = Boolean(parseInt(grant[i*4 + 3]));
         this.career.grants.push({'yearFrom': yearFrom, 'yearTo': yearTo, 'name': grantName, 'role': isPI ? 'principal' : 'coinvestigator'});
       }
-      let achievements = d[11].split(',');
+      // Achievement History (paper) - 著者タイプの新区分に対応するインポート処理
+      let achievements = d[12].split(',');
       for(let i=0; i<achievements.length; i++) {
         let tmp = achievements[i].split('_');
         for(let j=0; j<tmp.length; j++) {
@@ -1484,7 +1721,7 @@ var app = new Vue({
     }
   },
   computed: {
-    systemVersion: function() { return 'v1.0.2'; }
+    systemVersion: function() { return 'v1.0.3'; }
   }
 });
 app.initialize();
