@@ -1,1729 +1,806 @@
 <!DOCTYPE html>
 <html lang="ja">
-<meta charset="utf-8">
-<title>SuccessRiver AcademicCareerChart</title>
-<style>
-*,*::before,*::after{box-sizing:border-box}ul[class],ol[class]{padding:0}body,h1,h2,h3,h4,p,ul[class],ol[class],figure,blockquote,dl,dd{margin:0}html{scroll-behavior:smooth}body{min-height:100vh;text-rendering:optimizeSpeed;line-height:1.5}ul[class],ol[class]{list-style:none}a:not([class]){text-decoration-skip-ink:auto}img,picture{max-width:100%;display:block}article>*+*{margin-top:1em}input,button,textarea,select{font:inherit}@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}}
-* {
-  font-feature-settings: "palt";
-  font-family: sans-serif;
-}
-:root {
-  --col-width: 50px;
-  --row-width: 50px;
-  --chart-header-position: 0px;
-}
-.clearfix::after {
-   content: "";
-   display: block;
-   clear: both;
-}
-.app {
-  overflow-x: hidden;
-}
-.app > header {
-  position: fixed;
-  z-index: 3;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 40px;
-  background: #333;
-}
-.app > header h1 {
-  float: left;
-  font-size: 1.2em;
-  line-height: 40px;
-  padding: 0 20px;
-  color: white;
-}
-.app > header nav ul {
-  padding: 0;
-  margin: 0;
-  float: right;
-}
-.app > header nav ul li {
-  display: inline-block;
-}
-.app > header nav ul li a {
-  display: block;
-  padding: 10px;
-  line-height: 20px;
-  color: white;
-  text-decoration: none;
-}
-.app > section h2 {
-  font-size: 1.1em;
-  padding: 0 0 5px;
-}
-section.file-select-container {
-  display: block;
-  margin: 40px 0 0;
-  padding: 20px 30px 30px;
-  background: #ddd;
-}
-section.file-select-container input {
-  display: none;
-}
-section.file-select-container label {
-  display: inline-block;
-  padding: 10px 20px;
-  background: #bbb;  
-  border-radius: 5px;
-  cursor: pointer;
-}
-section.file-select-container label:hover {
-  background: #aaa;
-}
-section.file-select-container p.selected-file-name {
-  position: relative;
-  display: inline-block;
-  padding: 10px 200px 10px 20px;
-  background: #bbb;
-  border-radius: 5px;
-  cursor: pointer;
-}
-section.file-select-container p.selected-file-name:hover {
-  opacity: 0.7;
-}
-section.file-select-container p.selected-file-name span {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  padding: 10px 20px;
-  background: #666;
-  border-radius: 0 5px 5px 0;
-  color: white;
-}
-section.chart-setting-container {
-  padding: 20px 30px;
-  background: #eee;
-}
-section.chart-setting-container dl dt {
-  float: left;
-  width: 100px;
-  padding: 5px 0;
-  min-height: 30px;
-}
-section.chart-setting-container dl dd {
-  margin: 0 0 0 100px;
-  padding: 5px 0;
-  min-height: 30px;
-}
-section.chart-setting-container dl dd ul {
-  margin: 0;
-  padding: 0;
-}
-section.chart-setting-container dl dd ul li {
-  float: left;
-  list-style: none;
-  margin: 0 20px 0 0;
-}
-section.career-chart-container {
-  padding: 20px 30px 30px;
-}
-.career-chart-empty {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  width: calc(100vw - 60px);
-  height: 200px;
-}
-.career-chart-empty label {
-  display: block;
-  line-height: 200px;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  color: gray;
-  cursor: pointer;
-}
-.career-chart-empty label:hover {
-  background: #eee;
-}
-.career-chart {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  width: calc(100vw - 60px);
-  overflow-x: auto;
-}
-.career-chart-wrap {
-  display: block;
-  margin: 30px 60px 20px;
-  width: var(--row-width);
-}
-.researcher-info,
-.achievement-chart,
-.grant-chart,
-.edujob-chart,
-.year-chart {
-  padding: 10px 0;
-  position: relative;
-}
-.career-chart h3 {
-  display: block;
-  position: absolute;
-  z-index: 0;
-  top: 0;
-  left: calc(var(--chart-header-position) - 10px);
-  width: 300px;
-  height: calc(100% - 10px);
-  font-size: 1em;
-}
-.career-chart h3:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -15px;
-  height: 100%;
-  width: 2px;
-  border: 1px dotted #ddd;
-  border-width: 0 0 0 2px;
-}
-.achievement-chart h3        { color:        #7a28a3; }
-.achievement-chart h3:before { border-color: #d6adea; }
-.grant-chart h3              { color:        #1b6f1b; }
-.grant-chart h3:before       { border-color: #a6d0a6; }
-.edujob-chart h3             { color:        #4668a5; }
-.edujob-chart h3:before      { border-color: #739fee; }
-.researcher-info {
-  margin: 0 0 10px;
-  height: 50px;
-}
-.researcher-info h3 span {
-  display: block;
-  font-size: 0.8em;
-  font-weight: normal;
-}
-.achievement-row {
-  position: relative;
-  z-index: 1;
-  height: 100px;
-  min-height: 50px;
-  padding: 20px 0 0;
-}
-.achievement-col {
-  float: left;
-  display: flex;
-  flex-direction: column-reverse;
-  width: calc(var(--col-width) - 4px);
-  height: 100%;
-  margin: 0 4px 0 0;
-}
-.achievement-cell {
-  width: 100%;
-  height: 5px;
-  margin: 1px 0 0;
-  align-self: flex-end;
-}
-
-/* カラーブラインドセーフな著者タイプの色分け */
-.achievement-cell.item-first-and-corresp { background: #d73027; } /* 濃い赤 - 筆頭かつ責任著者 */
-.achievement-cell.item-first-only { background: #fc8d62; }       /* オレンジ - 筆頭著者のみ */
-.achievement-cell.item-corresp-only { background: #8da0cb; }     /* 青 - 責任著者のみ */
-.achievement-cell.item-other { background: #e78ac3; }            /* 薄いピンク - その他共著者 */
-
-.grant-row,
-.edujob-row {
-  position: relative;
-  z-index: 1;
-  height: 30px;
-}
-
-/* テキスト見切れためのCSS */
-.grant-cell,
-.edujob-cell {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  height: 25px;
-  padding: 0 0 3px;
-  font-size: 0.8em;
-  line-height: 1em;
-  border: 1px solid orange;
-  border-width: 0 0 5px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-/* 常時表示モード用のスタイル */
-.app[data-text-mode="always"] .grant-cell,
-.app[data-text-mode="always"] .edujob-cell {
-  height: auto;
-  min-height: 25px;
-  padding: 2px 0 5px;
-  overflow: visible;
-}
-
-.grant-cell.isPI      { border-color: #4ea24e; }
-.grant-cell.isnotPI   { border-color: #a6d0a6; }
-.edujob-cell.edu-cell { border-color: #739fee; }
-.edujob-cell.job-cell { border-color: #5077bd; }
-
-.grant-cell span,
-.edujob-cell span {
-  display: inline-block;
-  margin: 0 auto;
-  align-self: flex-end;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  padding: 0 4px;
-}
-
-/* 常時表示モード用のテキストスタイル */
-.app[data-text-mode="always"] .grant-cell span,
-.app[data-text-mode="always"] .edujob-cell span {
-  white-space: normal;
-  word-break: break-word;
-  overflow: visible;
-  text-overflow: unset;
-  align-self: flex-start;
-  line-height: 1.2;
-  padding: 2px 4px;
-}
-
-/* ホバー時のスタイル */
-.app[data-text-mode="hover"] .grant-cell:hover,
-.app[data-text-mode="hover"] .edujob-cell:hover {
-  z-index: 10;
-  overflow: visible;
-  background-color: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.app[data-text-mode="hover"] .grant-cell:hover span,
-.app[data-text-mode="hover"] .edujob-cell:hover span {
-  white-space: normal;
-  word-break: break-word;
-  position: absolute;
-  bottom: 5px;
-  left: 0;
-  min-width: 150px;
-  max-width: 250px;
-  background-color: rgba(255, 255, 255, 0.98);
-  padding: 4px 8px;
-  border-radius: 3px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-}
-
-/* 凡例のスタイル */
-.achievement-legend {
-  padding: 5px 10px;
-  margin: 5px 0 10px;
-  font-size: 0.8em;
-}
-
-.legend-item {
-  float: left;
-  margin-right: 15px;
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-}
-
-.legend-color {
-  display: inline-block;
-  width: 15px;
-  height: 15px;
-  margin-right: 5px;
-}
-
-.legend-color.item-first-and-corresp { background: #d73027; }
-.legend-color.item-first-only { background: #fc8d62; }
-.legend-color.item-corresp-only { background: #8da0cb; }
-.legend-color.item-other { background: #e78ac3; }
-
-.year-cell {
-  float: left;
-  display: block;
-  width: calc(var(--col-width) - 4px);
-  margin: 0 4px 0 0;
-  padding: 5px 0 0;
-  font-size: 0.8em;
-  line-height: 1em;
-  text-align: center;
-  border: 1px solid #999;
-  border-width: 5px 0 0;
-}
-.year-cell.now {
-  width: calc(var(--col-width) * 2);
-  border: 1px solid #ccc;
-  border-width: 5px 0 0;
-}
-.export-chart ul {
-  padding: 0;
-  margin: 10px 0;
-}
-.export-chart ul li {
-  display: inline-block;
-  color: white;
-  margin: 10px 5px 5px 0;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 0.9em;
-  cursor: pointer;
-}
-.export-chart ul li:hover {
-  opacity: 0.7;
-}
-.embed-chart {
-  background: #339;
-}
-.print-chart {
-  background: #393;
-}
-.export-chart textarea {
-  border: 0;
-  height: 40px;
-  width: 100%;
-  padding: 10px;
-  line-height: 20px;
-  background: #eee;
-  border-radius: 5px;
-  white-space: nowrap;
-}
-footer {
-  padding: 20px 30px;
-  background: #eee;
-  color: black;
-  word-break: break-all;
-}
-footer h2 {
-  font-size: 1em;
-}
-footer a {
-  color: blue;
-}
-footer p {
-  padding: 10px 20px 0;
-}
-footer p + h2 {
-  margin: 30px 0 0;
-}
-footer .release-note {
-  margin: 10px 20px;
-}
-footer .release-note li {
-  list-style: circle;
-  margin: 5px 20px;
-}
-footer .original-tweet {
-  float: right;
-  padding: 5px;
-  margin: 0 0 0 30px;
-}
-footer .content {
-  margin: 25px 0;
-}
-
-.app.embed header,
-.app.embed footer,
-.app.embed .file-select-container,
-.app.embed .chart-setting-container,
-.app.embed .career-chart-container h2,
-.app.embed .export-chart,
-.app.print header,
-.app.print footer,
-.app.print .file-select-container,
-.app.print .chart-setting-container,
-.app.print .career-chart-container h2,
-.app.print .export-chart {
-  display: none;
-}
-.app.embed .career-chart-container,
-.app.print .career-chart-container {
-  padding: 0px;
-}
-.app.embed .career-chart,
-.app.print .career-chart {
-  width: 100vw;
-  border: none;
-}
-
-</style>
-<div class="app" id="app" :class="{embed: isEmbeddingMode, print:isPrintingMode}" :data-text-mode="chart.settings.textDisplayMode">>
-<header class="clearfix">
-  <h1>SuccessRiver AcademicCareerChart (${ systemVersion })</h1>
-  <nav>
-    <ul>
-      <li><a href="https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS">Github</a>
-    </ul>
-  </nav>
-</header>
-<section class="file-select-container">
-  <h2>① researchmapのエクスポートファイルを選択</h2>
-  <div v-if="isSharingMode">
-    <p class="selected-file-name" @click="window.location.search = ''">
-      URLから生成されました。
-      <span>ファイルを変更する</span>
-    </p>
-  </div>
-  <div v-else-if="rmFile == null">
-    <label for="researchmap-file-input">ファイルを選択</label>
-    <input type="file" id="researchmap-file-input" @change="selectrmFile"></li>
-  </div>
-  <div v-else>
-    <p class="selected-file-name" @click="rmFile = null">
-      ${ rmFile.name }
-      <span>ファイルを変更する</span>
-    </p>
-  </div>
-</section>
-<section class="chart-setting-container">
-  <h2>② 表示オプション</h2>
-  <dl class="clearfix">
-    <dt>表示横幅</dt>
-    <dd>
-      <input type="range" min="30" max="200"
-             style="width: 200px"
-             v-model="chart.settings.cellWidth"
-             @input="updateCellWidth">
-      ${ chart.settings.cellWidth }px
-    </dd>
-    <dt>表示項目</dt>
-    <dd>
-      <ul class="clearfix">
-        <li v-for="(item, type) in achievementNameList">
-          <input type="checkbox"
-                 :id="'disp-setting-achievement' + type"
-                 v-model="chart.settings.visibility[type]">
-          <label :for="'disp-setting-achievement' + type">${ item }</label>
-        </li>
-      </ul>
-    </dd>
-    <dd>
-      <ul class="clearfix">
-        <li>
-          <input type="checkbox" id="disp-setting-grants-notPI"
-                 v-model="chart.settings.visibility.notPIgrants"
-                 @change="replotCareerHistory">
-          <label for="disp-setting-grants-notPI">代表研究者以外の予算</label>
-        </li>
-      </ul>
-    </dd>
-    <dt>テキスト表示</dt>
-    <dd>
-      <ul class="clearfix">
-        <li>
-          <input type="radio" id="text-display-hover" value="hover"
-                 v-model="chart.settings.textDisplayMode"
-                 @change="updateTextDisplayMode">
-          <label for="text-display-hover">ホバー時のみ表示</label>
-        </li>
-        <li>
-          <input type="radio" id="text-display-always" value="always"
-                 v-model="chart.settings.textDisplayMode"
-                 @change="updateTextDisplayMode">
-          <label for="text-display-always">常時表示</label>
-        </li>
-      </ul>
-    </dd>
-  </dl>
-</section>
-<section class="career-chart-container">
-  <h2>③ キャリアチャート出力結果</h2>
-  <div class="career-chart-empty" v-if="!chart.latestYear"><label for="researchmap-file-input">ファイルを選択してください</label></div>
-  <div class="career-chart" v-if="chart.latestYear" @scroll="onScrollChart">
-    <div class="career-chart-wrap" id="career-chart-wrap">
-      <div class="researcher-info">
-        <h3>
-          ${ researcher.name.display }
-          <span>${ researcher.affiliation.display }</span>
-        </h3>
-      </div>
-      <div class="achievement-chart">
-        <!-- 論文著者タイプの凡例を追加 -->
-        <div class="achievement-legend clearfix">
-          <div class="legend-item">
-            <span class="legend-color item-first-and-corresp"></span>
-            <span class="legend-text">筆頭著者かつ責任著者</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color item-first-only"></span>
-            <span class="legend-text">筆頭著者</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color item-corresp-only"></span>
-            <span class="legend-text">責任著者</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color item-other"></span>
-            <span class="legend-text">共著者</span>
-          </div>
-        </div>
-        
-        <div class="achievement-row"
-             v-for="type in achievementTypeList"
-             v-if="chart.settings.visibility[type]"
-             :style="{height: (30 + 6 * getAchievementRowHeight(type)) + 'px'}">
-          <h3>${ achievementNameList[type] }</h3>
-          <div class="achievement-col"
-               v-for="(col, i) in chart.achievements[type]">
-            <span class="achievement-cell"></span>
-            <span class="achievement-cell"
-                  v-for="item in col"
-                  :class="{
-                    'item-first-and-corresp': item === 3, 
-                    'item-first-only': item === 2, 
-                    'item-corresp-only': item === 1, 
-                    'item-other': item === 0
-                  }"></span>
-          </div>
-        </div>
-      </div>
-      <div class="grant-chart">
-        <h3>予算獲得状況</h3>
-        <div class="grant-row"
-             v-for="(row, i) in chart.grants.slice().reverse()">
-          <span class="grant-cell"
-                v-for="(item, j) in row"
-                :class="{'isPI': item.isPI, 'isnotPI': !item.isPI}"
-                :style="getStackCellStyle(item)"
-                :title="item.name">
-            <span v-html="item.name"></span>
-          </span>
-        </div>
-      </div>
-      <div class="edujob-chart">
-        <h3>学歴・職歴</h3>
-        <div class="edujob-row"
-             v-for="(row, i) in chart.educationsAndJobs.slice().reverse()">
-          <span class="edujob-cell"
-                v-for="(item, j) in row"
-                :class="{'edu-cell': item.isEdu, 'job-cell': !item.isEdu}"
-                :style="getStackCellStyle(item)"
-                :title="item.name">
-            <span v-html="item.name"></span>
-          </span>
-        </div>
-      </div>
-      <div class="year-chart clearfix">
-        <span class="year-cell"
-              v-for="i in (chart.latestYear - chart.firstYear + 1)">${ chart.firstYear + i - 1}</span>
-        <span class="year-cell now"></span>
-      </div>
-    </div>
-  </div>
-  <nav class="export-chart" v-if="chart.latestYear">
-    <ul>
-      <li class="embed-chart" @click="embedChart">埋め込みコードを取得する</li>
-      <li class="generate-standalone" @click="generateStandaloneEmbed" style="background: #6c5ce7;">スタンドアロン埋め込みHTMLを生成</li>
-      <li class="print-chart" @click="printChart">印刷モードで表示</li>
-    </ul>
-    <textarea id="exported-chart-url">${ exportedChartURL }</textarea>
-  </nav>
-</section>
-<footer class="clearfix">
-  <div class="original-tweet">
-    <blockquote class="twitter-tweet"><p lang="ja" dir="ltr">キャリア形成について話す機会があった時に、キャリアイベントとライフイベントを並べた図を作成したのだけれど、研究メインのものとして、ライフイベントの代わりに学生指導状況という項目を作りつつ、色々と情報を更新した。こういう年表を作り更新することで、自身の状況を俯瞰的に捉えておきたい <a href="https://t.co/1RDY98i4jj">pic.twitter.com/1RDY98i4jj</a></p>&mdash; サクセスリバーコーテシーinエイトプリンス (@rei_nari) <a href="https://twitter.com/rei_nari/status/1691102017153114112?ref_src=twsrc%5Etfw">August 14, 2023</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-  </div>
-  <div class="content">
-    <h2>◆ このページについて</h2>
-    <p>
-      「SuccessRiver AcademicCareerChart (${ systemVersion })」は、<a href="https://twitter.com/rei_nari">@rei_nari</a>さん考案のキャリアイベント図をresearchmapに登録された情報から生成します。
-    </p>
-    <p>
-      オリジナル： <a href="https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS">https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS</a> by 松田裕貴（<a href="https://twitter.com/yukimatJP">@yukimatJP</a>）をフォークして作りました。
-    </p>
-    <p>
-      Githubリポジトリ： <a href="https://github.com/dacchi-s/SuccessRiverAcademicCareerChartJS">https://github.com/dacchi-s/SuccessRiverAcademicCareerChartJS</a>
-    </p>
-    <p>
-      作者情報： 多田 塁（Rui Tada）
-    </p>
-    <h2>◇ リリースノート</h2>
-    <ul class="release-note">
-      <li>
-        2025/06/11 (v1.0.3)<br>
-        動的高さ調整ロジック実装。テキストを短縮せず、横幅と文字数から必要な縦幅を自動計算。
-      <li>
-        2025/06/11 (v1.0.2)<br>
-        常時表示モードの重複問題を改善。テキスト短縮機能追加、行間調整を実装。
-      <li>
-        2025/06/10 (v1.0.1)<br>
-        URL共有機能を削除。埋め込み機能に集約。
-      <li>
-        2025/06/10 (v1.0.0)<br>
-        リリースしました。
-      </li>
-    </ul>
-  </div>
-</footer>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
-<script>
-const $ = (id) => { return document.getElementById(id); }
-const JSONL = {
-  parse: (jsonl) => {
-    let jsonlArray = jsonl.split("\n").filter(function (s) { return s !== ""; });
-     let jsonlObj = {}
-    for(let i=0; i < jsonlArray.length; i++) {
-      jsonlRow = JSON.parse(jsonlArray[i]);
-       if(!(jsonlRow.insert.type in jsonlObj)) {
-         jsonlObj[jsonlRow.insert.type] = [];
-       }
-      jsonlObj[jsonlRow.insert.type].push(jsonlRow.merge);
-    }
-    return jsonlObj;
-  }
-}
-var app = new Vue({
-  delimiters: ['${', '}'],
-  el: '#app',
-  data: {
-    isSharingMode:   false,
-    isEmbeddingMode: false,
-    isPrintingMode:  false,
-    rmFile: null,
-    rmJson: null,
-    researcher: {
-      name: {
-        ja: [],
-        en: [],
-        display: ''
-      },
-      affiliation: {
-        display: ''
-      }
-    },
-    career: {
-      educationsAndJobs: [],
-      grants: [],
-      achievements: {
-        journal:      {total: 0},
-        intlConf:     {total: 0},
-        domesticConf: {total: 0},
-        total: 0,
-      }
-    },
-    chart: {
-      firstYear: new Date().getFullYear(),
-      latestYear: 0,
-      settings: {
-        cellWidth: 50,
-        visibility: {
-          journal:      true,
-          intlConf:     true,
-          domesticConf: true,
-          notPIgrants:  true,
-        },
-        textDisplayMode: 'hover'
-      },
-      educationsAndJobs: [],
-      grants: [],
-      achievements: {
-        journal:      [],
-        intlConf:     [],
-        domesticConf: [],
-      },
-    },
-    achievementTypeList: ['journal', 'intlConf', 'domesticConf'],
-    achievementNameList: {'journal': '論文誌・ジャーナル', 'intlConf': '国際会議プロシーディングス', 'domesticConf': '国内研究会・シンポジウム'},
-    exportedChartURL: '',
-    importData: '',
-  },
-  created: function() {
-  },
-  mounted: function() {
-  },
-  destroyed: function () {
-  },
-  methods: {
-    initialize: function() {
-      let params = new URLSearchParams(window.location.search);
-      if(params.has('chart')) {
-        this.isSharingMode = true;
-        this.importData = params.get('chart');
-        this.importChart();
-      }
-      if(params.has('embed')) {
-        this.isEmbeddingMode = true;
-      }
-      if(params.has('print')) {
-        this.isPrintingMode = true;
-      }
-    },
-    selectrmFile: function(e) {
-      const files = e.target.files || e.dataTransfer.files;
-      this.rmFile = (files[0].name.split('.').pop() == 'jsonl') ? files[0] : null;
-      var reader = new FileReader();
-      reader.readAsText(this.rmFile);
-      reader.onload = () => {  
-        this.rmJson = JSONL.parse(reader.result);
-        this.parseCareerHistory();
-        this.plotCareerHistory();
-      };
-    },
-    parseCareerHistory() {
-      // Basic Info
-      if('researchers' in this.rmJson) {
-        let researcher = this.rmJson.researchers[0];
-        this.researcher.name.ja = [
-          researcher.family_name.ja + " " + researcher.given_name.ja,
-          researcher.family_name.ja +       researcher.given_name.ja,
-        ];
-        this.researcher.name.en = [
-          researcher.family_name.en + " " + researcher.given_name.en,
-          researcher.given_name.en  + " " + researcher.family_name.en,
-        ];
-        this.researcher.name.display = researcher.family_name.ja + " " + researcher.given_name.ja
-                              + " (" + researcher.given_name.en  + " " + researcher.family_name.en + ")";
-        this.researcher.affiliation.display = researcher.affiliations[0].affiliation.ja;
-      }
-      // Education History
-      for(let i=0; i < this.rmJson.education.length; i++) {
-        let edu = this.rmJson.education[i];
-        let yearFrom = this.getFinancialYear(edu.from_date);
-        let yearTo   = this.getFinancialYear(edu.to_date);
-        let eduName  = this.getEduName(edu);
-        this.career.educationsAndJobs.push({'yearFrom': yearFrom, 'yearTo': yearTo, 'name': eduName, 'isEdu': true});
-        this.updateCareerPeriod(yearFrom.year, yearTo.year);
-      }
-      // Job History
-      for(let i=0; i < this.rmJson.research_experience.length; i++) {
-        let job = this.rmJson.research_experience[i];
-        let yearFrom = this.getFinancialYear(job.from_date);
-        let yearTo   = this.getFinancialYear(job.to_date);
-        let jobName  = this.getJobName(job);
-        this.career.educationsAndJobs.push({'yearFrom': yearFrom, 'yearTo': yearTo, 'name': jobName, 'isEdu': false});
-        this.updateCareerPeriod(yearFrom.year, yearTo.year);
-      }
-      // Grant History
-      for(let i=0; i < this.rmJson.research_projects.length; i++) {
-        let grant = this.rmJson.research_projects[i];
-        let yearFrom  = this.getFinancialYear(grant.from_date);
-        let yearTo    = this.getFinancialYear(grant.to_date);
-        let grantName = this.getGrantName(grant);
-        let grantRole = !('research_project_owner_role' in grant) ? 'undefined'
-                      : grant.research_project_owner_role == 'principal_investigator' ? 'principal'
-                      : grant.research_project_owner_role == 'coinvestigator' ? 'coinvestigator'
-                      : 'others';
-        this.career.grants.push({'yearFrom': yearFrom, 'yearTo': yearTo, 'name': grantName, 'role': grantRole});
-        this.updateCareerPeriod(yearFrom.year, yearTo.year);
-      }
-      // Achievement History (paper)
-      for(let i=0; i < this.rmJson.published_papers.length; i++) {
-        let achvmnt = this.rmJson.published_papers[i];
-        if ('published_paper_type' in achvmnt) {
-          let achvmntType = achvmnt.published_paper_type == 'scientific_journal' ? 'journal'
-                          : achvmnt.published_paper_type == 'international_conference_proceedings' ? 'intlConf'
-                          : achvmnt.published_paper_type == 'symposium' ? 'domesticConf'
-                          : '';
-          if(achvmntType != '') {
-            let firstAuthorFlag = false;
-            let correspAuthorFlag = false;
-            if('published_paper_owner_roles' in achvmnt) {
-              firstAuthorFlag = achvmnt.published_paper_owner_roles.includes('lead');
-              correspAuthorFlag = achvmnt.published_paper_owner_roles.includes('corresponding');
-            }
-            if(!firstAuthorFlag && 'en' in achvmnt.authors) {
-              firstAuthorFlag = this.researcher.name.en.includes(achvmnt.authors.en[0].name);
-            }
-            if(!firstAuthorFlag && 'ja' in achvmnt.authors) {
-              firstAuthorFlag = this.researcher.name.ja.includes(achvmnt.authors.ja[0].name);
-            }
-            achvmntYear = this.getFinancialYear(achvmnt.publication_date).year;
-            if(!(achvmntYear in this.career.achievements[achvmntType])) {
-              this.career.achievements[achvmntType][achvmntYear] = {'firstCorresp': 0, 'first': 0, 'corresp': 0, 'other': 0, 'total': 0};
-            }
-            let roleKey = (firstAuthorFlag && correspAuthorFlag) ? 'firstCorresp'
-                        : firstAuthorFlag ? 'first'
-                        : correspAuthorFlag ? 'corresp'
-                        : 'other'
-            this.career.achievements[achvmntType][achvmntYear][roleKey]++;
-            this.career.achievements[achvmntType][achvmntYear].total++;
-            this.career.achievements[achvmntType].total++;
-            this.career.achievements.total++;
-            this.updateCareerPeriod(achvmntYear, achvmntYear);
-          }
-        }
-      }
-    },
-    getFinancialYear(targetDate, isFrom) {
-      if(targetDate == "9999" || targetDate == undefined || targetDate == null){
-        return {'year': new Date().getFullYear() + 1, 'month': isFrom ? 4 : 3};
-      }
-      dt = targetDate.split('-');
-      year  = (dt.length > 0) ? parseInt(dt[0]) : new Date.now().getYear();
-      month = (dt.length > 1) ? parseInt(dt[1]) : isFrom ? 4 : 3;
-      return {'year': year, 'month': month}
-    },
-    updateCareerPeriod(yearFrom, yearTo) {
-      if(this.chart.firstYear  > yearFrom) { this.chart.firstYear  = yearFrom; }
-      if(this.chart.latestYear < yearTo  ) { this.chart.latestYear = Math.min(new Date().getFullYear(), yearTo);   }
-    },
-    getEduName(edu) {
-      let parts = [];
-      
-      // affiliation（所属機関）を追加
-      if('affiliation' in edu) {
-        if(edu.affiliation.ja) {
-          parts.push(edu.affiliation.ja);
-        } else if(edu.affiliation.en) {
-          parts.push(edu.affiliation.en);
-        }
-      }
-      
-      // department（学部・研究科等）を追加
-      if('department' in edu) {
-        if(edu.department.ja) {
-          parts.push(edu.department.ja);
-        } else if(edu.department.en) {
-          parts.push(edu.department.en);
-        }
-      }
-      
-      // course（専攻・課程等）を追加
-      if('course' in edu) {
-        if(edu.course.ja) {
-          parts.push(edu.course.ja);
-        } else if(edu.course.en) {
-          parts.push(edu.course.en);
-        }
-      }
-      
-      let eduName = parts.join(' ');
-      
-      // 課程判定ロジック（日本語要素が含まれている場合のみ）
-      if(eduName && (
-          (edu.affiliation && edu.affiliation.ja) || 
-          (edu.department && edu.department.ja) || 
-          (edu.course && edu.course.ja)
-        )) {
-        if(eduName.includes("修士")) { 
-          return eduName + ' (修士課程)'; 
-        } else if(eduName.includes("修士課程")) { 
-          return eduName; 
-        } else if(eduName.includes("博士前期課程")) { 
-          return eduName; 
-        } else if(eduName.includes("博士後期課程")) { 
-          return eduName; 
-        } else if(eduName.includes("博士課程")) { 
-          return eduName; 
-        } else if(eduName.includes("博士")) { 
-          return eduName + ' (博士課程)'; 
-        } else if(eduName.includes("研究科")) { 
-          return eduName; 
-        } else {
-          return eduName;
-        }
-      }
-      
-      return eduName || 'その他';
-    },
-    getJobName(job) {
-      let parts = [];
-      let lang = ('ja' in job.affiliation || ('job' in job && 'ja' in job.job)) ? 'ja' : 'en';
-      
-      // affiliation（所属機関）を追加
-      if('affiliation' in job && job.affiliation[lang]) {
-        parts.push(job.affiliation[lang]);
-      }
-      
-      // section（部署・学科等）を追加
-      if('section' in job && job.section[lang]) {
-        parts.push(job.section[lang]);
-      }
-      
-      // job（職種）を追加
-      if('job' in job && job.job[lang]) {
-        parts.push(job.job[lang]);
-      }
-      
-      let jobName = parts.join(' ');
-      
-      // 日本学術振興会の場合の特別処理
-      if(jobName.includes("日本学術振興会")) {
-        jobName = jobName.includes("DC1") ? "学振DC1"
-                : jobName.includes("DC2") ? "学振DC2"
-                : jobName.includes("RPD") ? "学振RPD"
-                : jobName.includes("SPD") ? "学振SPD"
-                : jobName.includes("PD")  ? "学振PD"  : jobName;
-      }
-      
-      return jobName || 'その他';
-    },
-    getGrantName(grant) {
-      let parts = [];
-      let lang = 'ja';
-      
-      // offer_organization（助成機関）を追加
-      if('offer_organization' in grant && grant.offer_organization[lang]) {
-        parts.push(grant.offer_organization[lang]);
-      } else if('offer_organization' in grant && grant.offer_organization['en']) {
-        parts.push(grant.offer_organization['en']);
-      }
-      
-      // category（カテゴリ）を追加
-      if('category' in grant && grant.category[lang]) {
-        parts.push(grant.category[lang]);
-      } else if('category' in grant && grant.category['en']) {
-        parts.push(grant.category['en']);
-      }
-      
-      // system_name（制度名）を追加（categoryがない場合の代替）
-      if(parts.length === 0 || (parts.length === 1 && 'system_name' in grant)) {
-        if('system_name' in grant && grant.system_name[lang]) {
-          parts.push(grant.system_name[lang]);
-        } else if('system_name' in grant && grant.system_name['en']) {
-          parts.push(grant.system_name['en']);
-        }
-      }
-      
-      // 重複を除去して結合
-      parts = [...new Set(parts)]; // 重複除去
-      return parts.length > 0 ? parts.join('・') : 'その他の研究費';
-    },
-    plotCareerHistory() {
-      // set CSS property
-      this.updateCellWidth();
-      // Education and Job History
-      let edujob = this.career.educationsAndJobs.sort((a, b) => a.yearFrom.year - b.yearFrom.year);
-      for(let i=0; i<edujob.length; i++) {
-        let newItem = this.getEducationAndJobItem(edujob[i]);
-        let placed = false;
-        
-        if(this.chart.educationsAndJobs.length == 0) {
-          this.chart.educationsAndJobs.push([newItem]);
-          placed = true;
-        } else {
-          for(let j=0; j<this.chart.educationsAndJobs.length; j++) {
-            let row = this.chart.educationsAndJobs[j];
-            let canPlaceInRow = true;
-            
-            // この行の全ての項目と重複チェック
-            for(let k=0; k<row.length; k++) {
-              if(!(newItem.to <= row[k].from || newItem.from >= row[k].to)) {
-                // 重複がある場合はこの行には配置できない
-                canPlaceInRow = false;
-                break;
-              }
-            }
-            
-            if(canPlaceInRow) {
-              // この行に配置可能
-              if(newItem.to <= row[0].from) {
-                // 行の最初に挿入
-                row.unshift(newItem);
-              } else {
-                // 行の最後に追加
-                row.push(newItem);
-              }
-              placed = true;
-              break;
-            }
-          }
-          
-          // どの行にも配置できない場合は新しい行を作成
-          if(!placed) {
-            this.chart.educationsAndJobs.push([newItem]);
-          }
-        }
-      }
-      // Grant History
-      let grants = this.career.grants.sort((a, b) => a.yearFrom.year - b.yearFrom.year);
-      for(let i=0; i<grants.length; i++) {
-        let newItem = this.getGrantItem(grants[i]);
-        if(this.chart.settings.visibility.notPIgrants || newItem.isPI) {
-          let placed = false;
-          
-          if(this.chart.grants.length == 0) {
-            this.chart.grants.push([newItem]);
-            placed = true;
-          } else {
-            for(let j=0; j<this.chart.grants.length; j++) {
-              let row = this.chart.grants[j];
-              let canPlaceInRow = true;
-              
-              // この行の全ての項目と重複チェック
-              for(let k=0; k<row.length; k++) {
-                if(!(newItem.to <= row[k].from || newItem.from >= row[k].to)) {
-                  // 重複がある場合はこの行には配置できない
-                  canPlaceInRow = false;
-                  break;
-                }
-              }
-              
-              if(canPlaceInRow) {
-                // この行に配置可能
-                if(newItem.to <= row[0].from) {
-                  // 行の最初に挿入
-                  row.unshift(newItem);
-                } else {
-                  // 行の最後に追加
-                  row.push(newItem);
-                }
-                placed = true;
-                break;
-              }
-            }
-            
-            // どの行にも配置できない場合は新しい行を作成
-            if(!placed) {
-              this.chart.grants.push([newItem]);
-            }
-          }
-        }
-      }
-      // Achievement History (paper) - 論文著者タイプの区分を4種類に変更
-      for(let achvmntType of this.achievementTypeList) {
-        this.chart.achievements[achvmntType] = {};
-        for(let i=this.chart.firstYear; i<=this.chart.latestYear; i++) {
-          let year = String(i);
-          if(year in this.career.achievements[achvmntType]) {
-            let achvmnt = this.career.achievements[achvmntType][year];
-            // 4種類の著者タイプを別々に扱う
-            let firstAndCorrespItems = Array(achvmnt.firstCorresp).fill(3); // 筆頭かつ責任著者
-            let firstOnlyItems = Array(achvmnt.first).fill(2);              // 筆頭著者のみ
-            let correspOnlyItems = Array(achvmnt.corresp).fill(1);          // 責任著者のみ
-            let otherItems = Array(achvmnt.other).fill(0);                  // その他共著者
-            
-            this.chart.achievements[achvmntType][year] = [
-              ...firstAndCorrespItems,
-              ...firstOnlyItems,
-              ...correspOnlyItems,
-              ...otherItems
-            ];
-          } else {
-            this.chart.achievements[achvmntType][year] = [];
-          }
-        }
-      }
-      
-      // 常時表示モードの場合は動的高さ計算
-      if (this.chart.settings.textDisplayMode === 'always') {
-        this.$nextTick(() => {
-          this.calculateDynamicHeights();
-        });
-      }
-    },
-    replotCareerHistory() {
-      // reset plot data
-      this.chart.educationsAndJobs = [];
-      this.chart.grants = [];
-      this.achievements = {
-              journal:      [],
-              intlConf:     [],
-              domesticConf: [],
-            };
-      this.plotCareerHistory();
-      
-      // 常時表示モードの場合は動的高さ計算
-      if (this.chart.settings.textDisplayMode === 'always') {
-        this.$nextTick(() => {
-          this.calculateDynamicHeights();
-        });
-      }
-    },
-    getEducationAndJobItem(item) {
-      return {
-        from:  parseFloat((item.yearFrom.year + item.yearFrom.month / 12.0).toFixed(2)),
-        to:    parseFloat((item.yearTo.year   + item.yearTo.month   / 12.0).toFixed(2)),
-        name:  item.name,
-        isEdu: item.isEdu,
-      };
-    },
-    getGrantItem(item) {
-      return {
-        from: parseFloat((item.yearFrom.year + item.yearFrom.month / 12.0).toFixed(2)),
-        to:   parseFloat((item.yearTo.year   + item.yearTo.month   / 12.0).toFixed(2)),
-        name: item.name,
-        isPI: item.role == 'principal',
-      };
-    },
-    updateCellWidth() {
-      let root = document.documentElement;
-      root.style.setProperty('--col-width', this.chart.settings.cellWidth + "px");
-      root.style.setProperty('--row-width', this.chart.settings.cellWidth * (4 + this.chart.latestYear - this.chart.firstYear) + "px");
-    },
-    
-    // テキスト表示モード変更
-    updateTextDisplayMode() {
-      if(this.chart.settings.textDisplayMode === 'always') {
-        this.$nextTick(() => {
-          this.calculateDynamicHeights();
-          console.log('テキスト表示モード: 常時表示 - 動的高さ調整');
-        });
-      } else {
-        // ホバーモードに戻す際は動的高さをリセット
-        this.$nextTick(() => {
-          this.resetDynamicHeights();
-          console.log('テキスト表示モード: ホバー時のみ - 高さリセット');
-        });
-      }
-    },
-    
-    // 動的高さをリセット（ホバーモード用）
-    resetDynamicHeights() {
-      // 予算獲得状況のリセット
-      const grantRows = document.querySelectorAll('.grant-row');
-      grantRows.forEach(row => {
-        row.style.height = '';
-        row.style.marginBottom = '';
-        const cells = row.querySelectorAll('.grant-cell');
-        cells.forEach(cell => {
-          cell.style.height = '';
-        });
-      });
-      
-      // 学歴・職歴のリセット
-      const eduJobRows = document.querySelectorAll('.edujob-row');
-      eduJobRows.forEach(row => {
-        row.style.height = '';
-        row.style.marginBottom = '';
-        const cells = row.querySelectorAll('.edujob-cell');
-        cells.forEach(cell => {
-          cell.style.height = '';
-        });
-      });
-    },
-    
-    // 動的高さ計算
-    calculateDynamicHeights() {
-      if (this.chart.settings.textDisplayMode !== 'always') return;
-      
-      // すべてのセルに対して高さを計算
-      this.$nextTick(() => {
-        this.adjustGrantCellHeights();
-        this.adjustEduJobCellHeights();
-      });
-    },
-    
-    // 予算セルの高さ調整
-    adjustGrantCellHeights() {
-      const rows = document.querySelectorAll('.grant-row');
-      rows.forEach((row, rowIndex) => {
-        let maxHeight = 25; // 最小高さ
-        const cells = row.querySelectorAll('.grant-cell');
-        
-        cells.forEach(cell => {
-          const span = cell.querySelector('span');
-          if (span) {
-            const textHeight = this.calculateTextHeight(span.textContent, cell.offsetWidth);
-            maxHeight = Math.max(maxHeight, textHeight + 10); // パディング追加
-          }
-        });
-        
-        // 行の高さを設定
-        row.style.height = maxHeight + 'px';
-        row.style.marginBottom = Math.max(15, maxHeight * 0.3) + 'px';
-        
-        // セルの高さも調整
-        cells.forEach(cell => {
-          cell.style.height = maxHeight + 'px';
-        });
-      });
-    },
-    
-    // 学歴職歴セルの高さ調整
-    adjustEduJobCellHeights() {
-      const rows = document.querySelectorAll('.edujob-row');
-      rows.forEach((row, rowIndex) => {
-        let maxHeight = 25; // 最小高さ
-        const cells = row.querySelectorAll('.edujob-cell');
-        
-        cells.forEach(cell => {
-          const span = cell.querySelector('span');
-          if (span) {
-            const textHeight = this.calculateTextHeight(span.textContent, cell.offsetWidth);
-            maxHeight = Math.max(maxHeight, textHeight + 10); // パディング追加
-          }
-        });
-        
-        // 行の高さを設定
-        row.style.height = maxHeight + 'px';
-        row.style.marginBottom = Math.max(15, maxHeight * 0.3) + 'px';
-        
-        // セルの高さも調整
-        cells.forEach(cell => {
-          cell.style.height = maxHeight + 'px';
-        });
-      });
-    },
-    
-    // テキストの高さを計算
-    calculateTextHeight(text, containerWidth) {
-      if (!text || !containerWidth) return 25;
-      
-      // 一時的な要素を作成してテキストの高さを測定
-      const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.visibility = 'hidden';
-      tempDiv.style.width = (containerWidth - 8) + 'px'; // パディング分を差し引く
-      tempDiv.style.fontSize = '0.8em';
-      tempDiv.style.lineHeight = '1.2';
-      tempDiv.style.fontFamily = 'sans-serif';
-      tempDiv.style.wordBreak = 'break-word';
-      tempDiv.style.whiteSpace = 'normal';
-      tempDiv.textContent = text;
-      
-      document.body.appendChild(tempDiv);
-      const height = tempDiv.offsetHeight;
-      document.body.removeChild(tempDiv);
-      
-      return Math.max(25, height);
-    },
-    onScrollChart(e) {
-      let root = document.documentElement;
-      root.style.setProperty('--chart-header-position', e.target.scrollLeft + "px");
-    },
-    getAchievementRowHeight(type) {
-      let maxLength = 0;
-      for([year, achvmnt] of Object.entries(this.chart.achievements[type])) {
-        maxLength = Math.max(maxLength, achvmnt.length);
-      }
-      return maxLength;
-    },
-    getStackCellStyle(item) {
-      return {
-        width: (this.chart.settings.cellWidth * (item.to - item.from)) + 'px',
-        left: (this.chart.settings.cellWidth * (item.from - this.chart.firstYear)) + 'px'
-      };
-    },
-    // ローカル環境対応のURL生成処理
-    exportChart() {
-      let eaj = [];
-      for(let i=0; i<this.chart.educationsAndJobs.length; i++) {
-        let tmp = [];
-        for(let j=0; j<this.chart.educationsAndJobs[i].length; j++) {
-          let data = this.chart.educationsAndJobs[i][j];
-          tmp.push([
-            parseFloat((data.from-2000.0).toFixed(2)),
-            parseFloat((data.to-2000.0).toFixed(2)),
-            "__" + data.name + "__",
-            Number(data.isEdu)
-          ]);
-        }
-        eaj.push(tmp);
-      }
-      let grants = [];
-      for(let i=0; i<this.chart.grants.length; i++) {
-        let tmp = [];
-        for(let j=0; j<this.chart.grants[i].length; j++) {
-          let data = this.chart.grants[i][j];
-          tmp.push([
-            parseFloat((data.from-2000.0).toFixed(2)),
-            parseFloat((data.to-2000.0).toFixed(2)),
-            "__" + data.name + "__",
-            Number(data.isPI)
-          ]);
-        }
-        grants.push(tmp);
-      }
-      let achvmnt = [];
-      for(let type of this.achievementTypeList) {
-        let tmp = [];
-        for(let i=this.chart.firstYear; i<=this.chart.latestYear; i++) {
-          let val = this.chart.achievements[type][String(i)];
-          // 著者タイプの新しい区分に対応するエクスポート処理
-          let firstAndCorresp = val.filter(e => e == 3).length;
-          let firstOnly = val.filter(e => e == 2).length;
-          let correspOnly = val.filter(e => e == 1).length;
-          let other = val.filter(e => e == 0).length;
-          tmp.push(firstAndCorresp + '-' + firstOnly + '-' + correspOnly + '-' + other);
-        }
-        tmp = tmp.join('_').replaceAll('0-0-0-0', '').replaceAll('0', '');
-        achvmnt.push(tmp);
-      }
-      let expJson = [
-        // researcher info
-        encodeURI(this.researcher.name.display),
-        encodeURI(this.researcher.affiliation.display),
-        // year
-        this.chart.firstYear-2000,
-        this.chart.latestYear-2000,
-        // setting
-        this.chart.settings.cellWidth,
-        Number(this.chart.settings.visibility.journal),
-        Number(this.chart.settings.visibility.intlConf),
-        Number(this.chart.settings.visibility.domesticConf),
-        Number(this.chart.settings.visibility.notPIgrants),
-        this.chart.settings.textDisplayMode,
-        this.chart.settings.textDisplayMode,
-        // chart
-        encodeURI(eaj),
-        encodeURI(grants),
-        encodeURI(achvmnt)
-      ];
-      // ローカル環境対応のURL生成
-      this.exportedChartURL = window.location.origin + window.location.pathname + '?chart=' + expJson.join('...');
-      setTimeout(() => {
-        $('exported-chart-url').select();
-        document.execCommand('copy');
-      }, 100);
-    },
-    // ローカル環境対応のシェア機能
-    shareChartToX() {
-      this.exportChart();
-      let url = encodeURI('https://twitter.com/intent/tweet?text=サクセスリバー式キャリアチャートを作ってみたよ！\n→ ' + this.exportedChartURL + '\n\n@yukimatJP&hashtags=SuccessRiverAcademicCareerChartJS,サクセスリバー式キャリアチャート');
-      window.open(url, "_blank");
-    },
-    // プライバシー配慮の埋め込みコード生成
-    embedChart() {
-      // チャートデータの変換（exportChartから移動）
-      let eaj = [];
-      for(let i=0; i<this.chart.educationsAndJobs.length; i++) {
-        let tmp = [];
-        for(let j=0; j<this.chart.educationsAndJobs[i].length; j++) {
-          let data = this.chart.educationsAndJobs[i][j];
-          tmp.push([
-            parseFloat((data.from-2000.0).toFixed(2)),
-            parseFloat((data.to-2000.0).toFixed(2)),
-            "__" + data.name + "__",
-            Number(data.isEdu)
-          ]);
-        }
-        eaj.push(tmp);
-      }
-      let grants = [];
-      for(let i=0; i<this.chart.grants.length; i++) {
-        let tmp = [];
-        for(let j=0; j<this.chart.grants[i].length; j++) {
-          let data = this.chart.grants[i][j];
-          tmp.push([
-            parseFloat((data.from-2000.0).toFixed(2)),
-            parseFloat((data.to-2000.0).toFixed(2)),
-            "__" + data.name + "__",
-            Number(data.isPI)
-          ]);
-        }
-        grants.push(tmp);
-      }
-      let achvmnt = [];
-      for(let type of this.achievementTypeList) {
-        let tmp = [];
-        for(let i=this.chart.firstYear; i<=this.chart.latestYear; i++) {
-          let val = this.chart.achievements[type][String(i)];
-          let firstAndCorresp = val.filter(e => e == 3).length;
-          let firstOnly = val.filter(e => e == 2).length;
-          let correspOnly = val.filter(e => e == 1).length;
-          let other = val.filter(e => e == 0).length;
-          tmp.push(firstAndCorresp + '-' + firstOnly + '-' + correspOnly + '-' + other);
-        }
-        tmp = tmp.join('_').replaceAll('0-0-0-0', '').replaceAll('0', '');
-        achvmnt.push(tmp);
-      }
-      let expJson = [
-        encodeURI(this.researcher.name.display),
-        encodeURI(this.researcher.affiliation.display),
-        this.chart.firstYear-2000,
-        this.chart.latestYear-2000,
-        this.chart.settings.cellWidth,
-        Number(this.chart.settings.visibility.journal),
-        Number(this.chart.settings.visibility.intlConf),
-        Number(this.chart.settings.visibility.domesticConf),
-        Number(this.chart.settings.visibility.notPIgrants),
-        encodeURI(eaj),
-        encodeURI(grants),
-        encodeURI(achvmnt)
-      ];
-      
-      let ww = $("career-chart-wrap").offsetWidth + 130;
-      let wh = $("career-chart-wrap").offsetHeight + 60;
-      
-      // ファイル名のみを使用
-      let fileName = window.location.pathname.split('/').pop() || 'career-chart.html';
-      let chartParams = expJson.join('...');
-      
-      this.exportedChartURL = '<iframe src="' + fileName + '?embed&chart=' + chartParams + '" width=' + ww + ' height=' + wh + ' title="研究キャリアチャート"></iframe>';
-      
-      setTimeout(() => {
-        $('exported-chart-url').select();
-        document.execCommand('copy');
-      }, 100);
-    },
-    // ローカル環境対応の印刷モード
-    // スタンドアロン埋め込み用HTML生成
-    generateStandaloneEmbed() {
-      let standaloneHTML = this.createStandaloneEmbedHTML();
-      
-      // Blobを作成してダウンロード
-      let blob = new Blob([standaloneHTML], { type: 'text/html' });
-      let url = URL.createObjectURL(blob);
-      let a = document.createElement('a');
-      a.href = url;
-      a.download = 'career-chart-embed.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      // テキストエリアにも表示
-      this.exportedChartURL = '<!-- スタンドアロン埋め込み用HTMLファイルがダウンロードされました -->\n<iframe src="career-chart-embed.html" width="' + 
-                             ($("career-chart-wrap").offsetWidth + 130) + '" height="' + 
-                             ($("career-chart-wrap").offsetHeight + 60) + '" title="研究キャリアチャート"></iframe>';
-      
-      setTimeout(() => {
-        $('exported-chart-url').select();
-      }, 100);
-    },
-    
-    // スタンドアロンHTML作成
-    createStandaloneEmbedHTML() {
-      return `<!DOCTYPE html>
-<html lang="ja">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>研究キャリアチャート</title>
+    <title>SuccessRiver AcademicCareerChart</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; background: #fff; padding: 10px; }
-        .chart-container { max-width: 100%; overflow-x: auto; }
-        .researcher-info { text-align: center; margin-bottom: 20px; }
-        .researcher-name { font-size: 1.1em; font-weight: bold; color: #333; }
-        .researcher-affiliation { font-size: 0.9em; color: #666; }
-        .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 15px 0; font-size: 0.8em; }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
-        .legend-color { width: 12px; height: 12px; border-radius: 2px; }
-        .legend-color.c1 { background: #d73027; }
-        .legend-color.c2 { background: #fc8d62; }
-        .legend-color.c3 { background: #8da0cb; }
-        .legend-color.c4 { background: #e78ac3; }
-        .achievement-section { margin: 15px 0; }
-        .achievement-type { font-weight: bold; margin-bottom: 8px; color: #444; }
-        .achievement-bar-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .achievement-bar { flex: 1; height: 20px; background: #eee; border-radius: 10px; overflow: hidden; display: flex; }
-        .bar-segment { height: 100%; }
-        .bar-segment.c1 { background: #d73027; }
-        .bar-segment.c2 { background: #fc8d62; }
-        .bar-segment.c3 { background: #8da0cb; }
-        .bar-segment.c4 { background: #e78ac3; }
-        .achievement-count { font-weight: bold; min-width: 40px; }
-        .achievement-details { font-size: 0.8em; color: #666; margin-left: 10px; }
-        @media (max-width: 600px) {
-            .legend { flex-direction: column; align-items: center; }
-            .achievement-bar-container { flex-direction: column; align-items: stretch; }
-            .achievement-count { margin-bottom: 5px; }
+        /* --- Base Reset & Typography --- */
+        *,*::before,*::after{box-sizing:border-box}
+        ul[class],ol[class]{padding:0}
+        body,h1,h2,h3,h4,p,ul[class],ol[class],figure,blockquote,dl,dd{margin:0}
+        html{scroll-behavior:smooth}
+        body{min-height:100vh;text-rendering:optimizeSpeed;line-height:1.5; font-family: sans-serif; font-feature-settings: "palt";}
+        ul[class],ol[class]{list-style:none}
+        a:not([class]){text-decoration-skip-ink:auto}
+        img,picture{max-width:100%;display:block}
+        article>*+*{margin-top:1em}
+        input,button,textarea,select{font:inherit}
+        @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}}
+
+        /* --- CSS Variables --- */
+        :root {
+            --col-width: 50px;
+            --row-width: 50px;
+            --chart-header-position: 0px;
+        }
+
+        /* --- Utility --- */
+        .clearfix::after { content: ""; display: block; clear: both; }
+
+        /* --- App Layout --- */
+        .app { overflow-x: hidden; }
+        .app > header { position: fixed; z-index: 3; top: 0; left: 0; width: 100vw; height: 40px; background: #333; }
+        .app > header h1 { float: left; font-size: 1.2em; line-height: 40px; padding: 0 20px; color: white; }
+        .app > header nav ul { padding: 0; margin: 0; float: right; }
+        .app > header nav ul li { display: inline-block; }
+        .app > header nav ul li a { display: block; padding: 10px; line-height: 20px; color: white; text-decoration: none; }
+        .app > section h2 { font-size: 1.1em; padding: 0 0 5px; }
+
+        /* --- File Select Section --- */
+        section.file-select-container { display: block; margin: 40px 0 0; padding: 20px 30px 30px; background: #ddd; }
+        section.file-select-container input { display: none; }
+        section.file-select-container label { display: inline-block; padding: 10px 20px; background: #bbb; border-radius: 5px; cursor: pointer; transition: background 0.2s; }
+        section.file-select-container label:hover { background: #aaa; }
+        section.file-select-container p.selected-file-name { position: relative; display: inline-block; padding: 10px 200px 10px 20px; background: #bbb; border-radius: 5px; cursor: pointer; }
+        section.file-select-container p.selected-file-name:hover { opacity: 0.7; }
+        section.file-select-container p.selected-file-name span { position: absolute; right: 0; top: 0; height: 100%; padding: 10px 20px; background: #666; border-radius: 0 5px 5px 0; color: white; }
+
+        /* --- Chart Settings Section --- */
+        section.chart-setting-container { padding: 20px 30px; background: #eee; }
+        section.chart-setting-container dl dt { float: left; width: 100px; padding: 5px 0; min-height: 30px; }
+        section.chart-setting-container dl dd { margin: 0 0 0 100px; padding: 5px 0; min-height: 30px; }
+        section.chart-setting-container dl dd ul { margin: 0; padding: 0; }
+        section.chart-setting-container dl dd ul li { float: left; list-style: none; margin: 0 20px 0 0; }
+
+        /* --- Career Chart Section --- */
+        section.career-chart-container { padding: 20px 30px 30px; }
+        .career-chart-empty { border: 1px solid #ddd; border-radius: 5px; width: calc(100vw - 60px); height: 200px; }
+        .career-chart-empty label { display: block; line-height: 200px; width: 100%; height: 100%; text-align: center; color: gray; cursor: pointer; }
+        .career-chart-empty label:hover { background: #eee; }
+
+        .career-chart { border: 1px solid #ddd; border-radius: 5px; width: calc(100vw - 60px); overflow-x: auto; background: #fff; }
+        .career-chart-wrap { display: block; margin: 30px 60px 20px; width: var(--row-width); }
+
+        .researcher-info, .achievement-chart, .grant-chart, .edujob-chart, .year-chart { padding: 10px 0; position: relative; }
+        .career-chart h3 { display: block; position: absolute; z-index: 2; top: 0; left: calc(var(--chart-header-position) - 10px); width: 300px; height: calc(100% - 10px); font-size: 1em; }
+        .career-chart h3:before { content: ''; position: absolute; top: 0; left: -15px; height: 100%; width: 2px; border: 1px dotted #ddd; border-width: 0 0 0 2px; }
+
+        .achievement-chart h3 { color: #7a28a3; }
+        .achievement-chart h3:before { border-color: #d6adea; }
+        .grant-chart h3 { color: #1b6f1b; }
+        .grant-chart h3:before { border-color: #a6d0a6; }
+        .edujob-chart h3 { color: #4668a5; }
+        .edujob-chart h3:before { border-color: #739fee; }
+
+        .researcher-info { margin: 0 0 10px; height: 50px; }
+        .researcher-info h3 span { display: block; font-size: 0.8em; font-weight: normal; }
+
+        .achievement-row { position: relative; z-index: 1; height: 100px; min-height: 50px; padding: 20px 0 0; }
+        .achievement-col { float: left; display: flex; flex-direction: column-reverse; width: calc(var(--col-width) - 4px); height: 100%; margin: 0 4px 0 0; }
+        .achievement-cell { width: 100%; height: 5px; margin: 1px 0 0; align-self: flex-end; }
+        .achievement-cell.item-first-and-corresp { background: #d73027; }
+        .achievement-cell.item-first-only { background: #fc8d62; }
+        .achievement-cell.item-corresp-only { background: #8da0cb; }
+        .achievement-cell.item-other { background: #e78ac3; }
+
+        .grant-row, .edujob-row { position: relative; z-index: 1; height: 30px; transition: height 0.2s ease, margin-bottom 0.2s ease; }
+        .grant-cell, .edujob-cell {
+            position: absolute; z-index: 2; display: flex; height: 25px;
+            padding: 0 0 3px; font-size: 0.8em; line-height: 1em;
+            border-width: 0 0 5px; border-style: solid;
+            overflow: hidden; transition: all 0.2s ease;
+        }
+
+        .app[data-text-mode="always"] .grant-cell, .app[data-text-mode="always"] .edujob-cell {
+            height: auto; min-height: 25px; padding: 2px 0 5px; overflow: visible;
+        }
+
+        .grant-cell.isPI { border-color: #4ea24e; }
+        .grant-cell.isnotPI { border-color: #a6d0a6; }
+        .edujob-cell.edu-cell { border-color: #739fee; }
+        .edujob-cell.job-cell { border-color: #5077bd; }
+
+        .grant-cell span, .edujob-cell span {
+            display: inline-block; margin: 0 auto; align-self: flex-end;
+            text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 100%; padding: 0 4px;
+        }
+
+        .app[data-text-mode="always"] .grant-cell span, .app[data-text-mode="always"] .edujob-cell span {
+            white-space: normal; word-break: break-word; overflow: visible;
+            text-overflow: unset; align-self: flex-start; line-height: 1.2; padding: 2px 4px;
+        }
+
+        .app[data-text-mode="hover"] .grant-cell:hover, .app[data-text-mode="hover"] .edujob-cell:hover {
+            z-index: 10; overflow: visible; background-color: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .app[data-text-mode="hover"] .grant-cell:hover span, .app[data-text-mode="hover"] .edujob-cell:hover span {
+            white-space: normal; word-break: break-word; position: absolute;
+            bottom: 5px; left: 0; min-width: 150px; max-width: 250px;
+            background-color: inherit; padding: 4px 8px; border-radius: 3px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .achievement-legend { padding: 5px 10px; margin: 5px 0 10px; font-size: 0.8em; }
+        .legend-item { float: left; margin-right: 15px; display: flex; align-items: center; margin-bottom: 5px; }
+        .legend-color { display: inline-block; width: 15px; height: 15px; margin-right: 5px; }
+        .legend-color.item-first-and-corresp { background: #d73027; }
+        .legend-color.item-first-only { background: #fc8d62; }
+        .legend-color.item-corresp-only { background: #8da0cb; }
+        .legend-color.item-other { background: #e78ac3; }
+
+        .year-chart { margin-top: 10px; }
+        .year-cell {
+            float: left; display: block; width: calc(var(--col-width) - 4px);
+            margin: 0 4px 0 0; padding: 5px 0 0; font-size: 0.8em; line-height: 1em;
+            text-align: center; border-top: 5px solid #999;
+        }
+        .year-cell.now { width: calc(var(--col-width) * 2); border-color: #ccc; }
+
+        /* --- Export Section --- */
+        .export-chart ul { padding: 0; margin: 10px 0; }
+        .export-chart ul li {
+            display: inline-block; color: white; margin: 10px 5px 5px 0;
+            padding: 5px 10px; border-radius: 5px; font-size: 0.9em; cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .export-chart ul li:hover { opacity: 0.7; }
+        .embed-chart { background: #339; }
+        .generate-standalone { background: #6c5ce7; }
+        .print-chart { background: #393; }
+        .export-chart textarea {
+            border: 1px solid #ccc; height: 80px; width: 100%; padding: 10px;
+            line-height: 1.4; background: #f5f5f5; border-radius: 5px;
+            white-space: pre; font-family: monospace;
+        }
+        
+        /* --- Footer --- */
+        footer { padding: 20px 30px; background: #eee; color: black; word-break: break-all; }
+        footer h2 { font-size: 1em; }
+        footer a { color: blue; }
+        footer p { padding: 10px 20px 0; }
+        footer p + h2 { margin: 30px 0 0; }
+        footer .release-note { margin: 10px 20px; }
+        footer .release-note li { list-style: circle; margin: 5px 20px; }
+        footer .original-tweet { float: right; padding: 5px; margin: 0 0 0 30px; }
+        footer .content { margin: 25px 0; }
+
+        /* --- Embed & Print Modes --- */
+        .app.embed header, .app.embed footer, .app.embed .file-select-container,
+        .app.embed .chart-setting-container, .app.embed .career-chart-container h2, .app.embed .export-chart { display: none; }
+        .app.embed .career-chart-container { padding: 0px; }
+        .app.embed .career-chart { width: 100vw; border: none; }
+
+        .app.print header, .app.print footer, .app.print .file-select-container,
+        .app.print .chart-setting-container, .app.print .career-chart-container h2, .app.print .export-chart { display: none; }
+        .app.print .career-chart-container { padding: 0px; }
+        .app.print .career-chart { width: 100%; border: none; overflow: visible; }
+        
+        /* --- 印刷用スタイル --- */
+        @media print {
+            body, html {
+                width: 100%;
+                height: auto;
+                background: #fff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* 印刷時にUIを確実に非表示 */
+            header, footer, .file-select-container, .chart-setting-container, .career-chart-container h2, .export-chart {
+                display: none !important;
+            }
+
+            .career-chart-container {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .career-chart {
+                width: 100% !important;
+                border: none !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+            }
+
+            /* 全ての要素で色を強制的に印刷 */
+            .achievement-cell, .grant-cell, .edujob-cell, .year-cell, .legend-color {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* ホバーエフェクトを無効化 */
+            .app[data-text-mode="hover"] .grant-cell:hover,
+            .app[data-text-mode="hover"] .edujob-cell:hover {
+                z-index: 2;
+                overflow: hidden;
+                background-color: transparent;
+                box-shadow: none;
+            }
+
+            .app[data-text-mode="hover"] .grant-cell:hover span,
+            .app[data-text-mode="hover"] .edujob-cell:hover span {
+                position: static;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                box-shadow: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="chart-container">
-        <div class="researcher-info">
-            <div class="researcher-name">${this.researcher.name.display}</div>
-            <div class="researcher-affiliation">${this.researcher.affiliation.display}</div>
+
+<div class="app" id="app" :class="{embed: isEmbeddingMode, print:isPrintingMode}" :data-text-mode="chart.settings.textDisplayMode">
+    <header class="clearfix">
+        <h1>SuccessRiver AcademicCareerChart (${ systemVersion })</h1>
+        <nav>
+            <ul>
+                <li><a href="https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS" target="_blank" rel="noopener">Github</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="file-select-container">
+        <h2>① researchmapのエクスポートファイルを選択</h2>
+        <div v-if="isSharingMode">
+            <p class="selected-file-name" @click="window.location.search = ''">
+                URLから生成されました。
+                <span>ファイルを変更する</span>
+            </p>
         </div>
+        <div v-else-if="rmFile == null">
+            <label for="researchmap-file-input">ファイルを選択</label>
+            <input type="file" id="researchmap-file-input" @change="selectrmFile" accept=".jsonl">
+        </div>
+        <div v-else>
+            <p class="selected-file-name" @click="rmFile = null">
+                ${ rmFile.name }
+                <span>ファイルを変更する</span>
+            </p>
+        </div>
+    </section>
+
+    <section class="chart-setting-container">
+        <h2>② 表示オプション</h2>
+        <dl class="clearfix">
+            <dt>表示横幅</dt>
+            <dd>
+                <input type="range" min="30" max="200" style="width: 200px" v-model="chart.settings.cellWidth" @input="updateCellWidth">
+                ${ chart.settings.cellWidth }px
+            </dd>
+            <dt>表示項目</dt>
+            <dd>
+                <ul class="clearfix">
+                    <li v-for="(item, type) in achievementNameList">
+                        <input type="checkbox" :id="'disp-setting-achievement' + type" v-model="chart.settings.visibility[type]">
+                        <label :for="'disp-setting-achievement' + type">${ item }</label>
+                    </li>
+                </ul>
+            </dd>
+            <dd>
+                <ul class="clearfix">
+                    <li>
+                        <input type="checkbox" id="disp-setting-grants-notPI" v-model="chart.settings.visibility.notPIgrants" @change="replotCareerHistory">
+                        <label for="disp-setting-grants-notPI">代表研究者以外の予算</label>
+                    </li>
+                </ul>
+            </dd>
+            <dt>テキスト表示</dt>
+            <dd>
+                <ul class="clearfix">
+                    <li>
+                        <input type="radio" id="text-display-hover" value="hover" v-model="chart.settings.textDisplayMode" @change="updateTextDisplayMode">
+                        <label for="text-display-hover">ホバー時のみ表示</label>
+                    </li>
+                    <li>
+                        <input type="radio" id="text-display-always" value="always" v-model="chart.settings.textDisplayMode" @change="updateTextDisplayMode">
+                        <label for="text-display-always">常時表示</label>
+                    </li>
+                </ul>
+            </dd>
+        </dl>
+    </section>
+
+    <section class="career-chart-container">
+        <h2>③ キャリアチャート出力結果</h2>
+        <div class="career-chart-empty" v-if="!chart.latestYear"><label for="researchmap-file-input">ファイルを選択してください</label></div>
         
-        <div class="legend">
-            <div class="legend-item">
-                <span class="legend-color c1"></span>
-                <span>筆頭著者かつ責任著者</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-color c2"></span>
-                <span>筆頭著者</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-color c3"></span>
-                <span>責任著者</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-color c4"></span>
-                <span>共著者</span>
+        <div class="career-chart" v-if="chart.latestYear" @scroll="onScrollChart" id="career-chart-main">
+            <div class="career-chart-wrap" id="career-chart-wrap">
+                <div class="researcher-info">
+                    <h3>
+                        ${ researcher.name.display }
+                        <span>${ researcher.affiliation.display }</span>
+                    </h3>
+                </div>
+                <div class="achievement-chart">
+                    <div class="achievement-legend clearfix">
+                        <div class="legend-item"><span class="legend-color item-first-and-corresp"></span><span class="legend-text">筆頭著者かつ責任著者</span></div>
+                        <div class="legend-item"><span class="legend-color item-first-only"></span><span class="legend-text">筆頭著者</span></div>
+                        <div class="legend-item"><span class="legend-color item-corresp-only"></span><span class="legend-text">責任著者</span></div>
+                        <div class="legend-item"><span class="legend-color item-other"></span><span class="legend-text">共著者</span></div>
+                    </div>
+                    
+                    <div class="achievement-row" v-for="type in achievementTypeList" v-if="chart.settings.visibility[type]" :style="{height: (30 + 6 * getAchievementRowHeight(type)) + 'px'}">
+                        <h3>${ achievementNameList[type] }</h3>
+                        <div class="achievement-col" v-for="(col, i) in chart.achievements[type]">
+                            <span class="achievement-cell"></span>
+                            <span class="achievement-cell" v-for="item in col" :class="{ 'item-first-and-corresp': item === 3, 'item-first-only': item === 2, 'item-corresp-only': item === 1, 'item-other': item === 0 }"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grant-chart">
+                    <h3>予算獲得状況</h3>
+                    <div class="grant-row" v-for="(row, i) in chart.grants.slice().reverse()">
+                        <span class="grant-cell" v-for="(item, j) in row" :class="{'isPI': item.isPI, 'isnotPI': !item.isPI}" :style="getStackCellStyle(item)" :title="item.name">
+                            <span v-html="item.name"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="edujob-chart">
+                    <h3>学歴・職歴</h3>
+                    <div class="edujob-row" v-for="(row, i) in chart.educationsAndJobs.slice().reverse()">
+                        <span class="edujob-cell" v-for="(item, j) in row" :class="{'edu-cell': item.isEdu, 'job-cell': !item.isEdu}" :style="getStackCellStyle(item)" :title="item.name">
+                            <span v-html="item.name"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="year-chart clearfix">
+                    <span class="year-cell" v-for="i in (chart.latestYear - chart.firstYear + 1)">${ chart.firstYear + i - 1}</span>
+                    <span class="year-cell now"></span>
+                </div>
             </div>
         </div>
+
+        <nav class="export-chart" v-if="chart.latestYear">
+            <ul>
+                <li class="generate-standalone" @click="generateStandaloneEmbed">スタンドアロンHTMLを生成</li>
+                <li class="embed-chart" @click="embedChart">埋め込みコード(iframe)</li>
+                <li class="print-chart" @click="printChart">印刷プレビュー</li>
+            </ul>
+            <textarea id="exported-chart-url" readonly @focus="$event.target.select()">${ exportedChartURL }</textarea>
+        </nav>
+    </section>
+
+    <footer class="clearfix">
+        <div class="original-tweet">
+            <blockquote class="twitter-tweet"><p lang="ja" dir="ltr">キャリア形成について話す機会があった時に、キャリアイベントとライフイベントを並べた図を作成したのだけれど、研究メインのものとして、ライフイベントの代わりに学生指導状況という項目を作りつつ、色々と情報を更新した。こういう年表を作り更新することで、自身の状況を俯瞰的に捉えておきたい <a href="https://t.co/1RDY98i4jj">pic.twitter.com/1RDY98i4jj</a></p>&mdash; サクセスリバーコーテシーinエイトプリンス (@rei_nari) <a href="https://twitter.com/rei_nari/status/1691102017153114112?ref_src=twsrc%5Etfw">August 14, 2023</a></blockquote>
+            <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        </div>
+        <div class="content">
+            <h2>◆ このページについて</h2>
+            <p>
+                「SuccessRiver AcademicCareerChart (${ systemVersion })」は、<a href="https://twitter.com/rei_nari">@rei_nari</a>さん考案のキャリアイベント図をresearchmapに登録された情報から生成します。
+            </p>
+            <p>
+                オリジナル： <a href="https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS">https://github.com/yukimatJP/SuccessRiverAcademicCareerChartJS</a> by 松田裕貴（<a href="https://twitter.com/yukimatJP">@yukimatJP</a>）をフォークして作りました。
+            </p>
+        </div>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const JSONL = {
+    parse: (jsonl) => {
+        const jsonlArray = jsonl.split("\n").filter(s => s !== "");
+        const jsonlObj = {};
+        for (let i = 0; i < jsonlArray.length; i++) {
+            try {
+                const jsonlRow = JSON.parse(jsonlArray[i]);
+                if (!(jsonlRow.insert.type in jsonlObj)) {
+                    jsonlObj[jsonlRow.insert.type] = [];
+                }
+                jsonlObj[jsonlRow.insert.type].push(jsonlRow.merge);
+            } catch(e) {
+                console.warn("Could not parse JSONL line: ", jsonlArray[i]);
+            }
+        }
+        return jsonlObj;
+    }
+};
+
+var app = new Vue({
+    delimiters: ['${', '}'],
+    el: '#app',
+    data: {
+        isSharingMode: false,
+        isEmbeddingMode: false,
+        isPrintingMode: false,
+        rmFile: null,
+        rmJson: null,
+        researcher: { name: { ja: [], en: [], display: '' }, affiliation: { display: '' } },
+        career: { educationsAndJobs: [], grants: [], achievements: { journal: {total: 0}, intlConf: {total: 0}, domesticConf: {total: 0}, total: 0 } },
+        chart: {
+            firstYear: new Date().getFullYear(),
+            latestYear: 0,
+            settings: { cellWidth: 50, visibility: { journal: true, intlConf: true, domesticConf: true, notPIgrants: true }, textDisplayMode: 'hover' },
+            educationsAndJobs: [],
+            grants: [],
+            achievements: { journal: [], intlConf: [], domesticConf: [] },
+        },
+        achievementTypeList: ['journal', 'intlConf', 'domesticConf'],
+        achievementNameList: {'journal': '論文誌・ジャーナル', 'intlConf': '国際会議プロシーディングス', 'domesticConf': '国内研究会・シンポジウム'},
+        exportedChartURL: '',
+        importData: '',
+    },
+    created: function() {
+        this.initialize();
+    },
+    methods: {
+        initialize() {
+            const params = new URLSearchParams(window.location.search);
+            if(params.has('embed')) this.isEmbeddingMode = true;
+            if(params.has('print')) this.isPrintingMode = true;
+            if(params.has('chart')) {
+                this.isSharingMode = true;
+                this.importData = params.get('chart');
+                this.importChart();
+            }
+        },
+        selectrmFile(e) {
+            const files = e.target.files || e.dataTransfer.files;
+            if (!files.length || !files[0].name.endsWith('.jsonl')) return;
+            this.rmFile = files[0];
+            const reader = new FileReader();
+            reader.readAsText(this.rmFile);
+            reader.onload = () => {
+                this.rmJson = JSONL.parse(reader.result);
+                this.parseCareerHistory();
+                this.plotCareerHistory();
+            };
+        },
+        parseCareerHistory() {
+            // Reset data
+            this.career = { educationsAndJobs: [], grants: [], achievements: { journal: {total: 0}, intlConf: {total: 0}, domesticConf: {total: 0}, total: 0 } };
+            this.chart.firstYear = new Date().getFullYear();
+            this.chart.latestYear = 0;
+
+            if('researchers' in this.rmJson) {
+                let r = this.rmJson.researchers[0];
+                this.researcher.name.ja = [r.family_name.ja + " " + r.given_name.ja, r.family_name.ja + r.given_name.ja];
+                this.researcher.name.en = [r.family_name.en + " " + r.given_name.en, r.given_name.en + " " + r.family_name.en];
+                this.researcher.name.display = `${r.family_name.ja} ${r.given_name.ja} (${r.given_name.en} ${r.family_name.en})`;
+                this.researcher.affiliation.display = r.affiliations[0]?.affiliation.ja || '';
+            }
+            // Education History
+            (this.rmJson.education || []).forEach(edu => {
+                const yearFrom = this.getFinancialYear(edu.from_date);
+                const yearTo = this.getFinancialYear(edu.to_date);
+                const eduName = this.getEduName(edu);
+                this.career.educationsAndJobs.push({yearFrom, yearTo, name: eduName, isEdu: true});
+                this.updateCareerPeriod(yearFrom.year, yearTo.year);
+            });
+            // Job History
+            (this.rmJson.research_experience || []).forEach(job => {
+                const yearFrom = this.getFinancialYear(job.from_date);
+                const yearTo = this.getFinancialYear(job.to_date);
+                const jobName = this.getJobName(job);
+                this.career.educationsAndJobs.push({yearFrom, yearTo, name: jobName, isEdu: false});
+                this.updateCareerPeriod(yearFrom.year, yearTo.year);
+            });
+            // Grant History
+            (this.rmJson.research_projects || []).forEach(grant => {
+                const yearFrom = this.getFinancialYear(grant.from_date);
+                const yearTo = this.getFinancialYear(grant.to_date);
+                const grantName = this.getGrantName(grant);
+                const grantRole = grant.research_project_owner_role === 'principal_investigator' ? 'principal' : 'coinvestigator';
+                this.career.grants.push({yearFrom, yearTo, name: grantName, role: grantRole});
+                this.updateCareerPeriod(yearFrom.year, yearTo.year);
+            });
+            // Achievement History
+            (this.rmJson.published_papers || []).forEach(paper => {
+                if (!paper.published_paper_type) return;
+                const typeMap = { 'scientific_journal': 'journal', 'international_conference_proceedings': 'intlConf', 'symposium': 'domesticConf' };
+                const achvmntType = typeMap[paper.published_paper_type];
+                if (!achvmntType) return;
+                
+                let firstAuthorFlag = (paper.published_paper_owner_roles || []).includes('lead');
+                if (!firstAuthorFlag) {
+                    const authorName = paper.authors?.en?.[0]?.name || paper.authors?.ja?.[0]?.name;
+                    if (authorName) firstAuthorFlag = this.researcher.name.en.includes(authorName) || this.researcher.name.ja.includes(authorName);
+                }
+                const correspAuthorFlag = (paper.published_paper_owner_roles || []).includes('corresponding');
+                
+                const achvmntYear = this.getFinancialYear(paper.publication_date).year;
+                if (!this.career.achievements[achvmntType][achvmntYear]) {
+                    this.career.achievements[achvmntType][achvmntYear] = {firstCorresp: 0, first: 0, corresp: 0, other: 0, total: 0};
+                }
+                const roleKey = (firstAuthorFlag && correspAuthorFlag) ? 'firstCorresp' : firstAuthorFlag ? 'first' : correspAuthorFlag ? 'corresp' : 'other';
+                this.career.achievements[achvmntType][achvmntYear][roleKey]++;
+                this.career.achievements[achvmntType][achvmntYear].total++;
+                this.career.achievements[achvmntType].total++;
+                this.career.achievements.total++;
+                this.updateCareerPeriod(achvmntYear, achvmntYear);
+            });
+        },
+        getFinancialYear(targetDate, isFrom = true) {
+            if (!targetDate || targetDate === "9999") {
+                return { year: new Date().getFullYear() + 1, month: isFrom ? 4 : 3 };
+            }
+            const dt = targetDate.split('-');
+            const year = dt[0] ? parseInt(dt[0]) : new Date().getFullYear();
+            const month = dt[1] ? parseInt(dt[1]) : isFrom ? 4 : 3;
+            return { year, month };
+        },
+        updateCareerPeriod(yearFrom, yearTo) {
+            if (yearFrom && this.chart.firstYear > yearFrom) this.chart.firstYear = yearFrom;
+            if (yearTo && this.chart.latestYear < yearTo) this.chart.latestYear = Math.min(new Date().getFullYear() + 1, yearTo);
+        },
+        getEduName: edu => [edu.affiliation?.ja, edu.department?.ja, edu.course?.ja].filter(Boolean).join(' ') || [edu.affiliation?.en, edu.department?.en, edu.course?.en].filter(Boolean).join(' ') || '学歴',
+        getJobName: job => [job.affiliation?.ja, job.section?.ja, job.job?.ja].filter(Boolean).join(' ') || [job.affiliation?.en, job.section?.en, job.job?.en].filter(Boolean).join(' ') || '職歴',
+        getGrantName: grant => [grant.offer_organization?.ja, grant.category?.ja, grant.system_name?.ja].filter(Boolean).join('・') || [grant.offer_organization?.en, grant.category?.en, grant.system_name?.en].filter(Boolean).join('・') || '研究費',
         
-        ${this.generateAchievementSectionsHTML()}
-    </div>
+        plotCareerHistory() {
+            this.updateCellWidth();
+            const stackItems = (items) => {
+                const sortedItems = items.sort((a, b) => a.from - b.from);
+                const rows = [];
+                sortedItems.forEach(item => {
+                    let placed = false;
+                    for (let row of rows) {
+                        const collision = row.some(existing => item.from < existing.to && item.to > existing.from);
+                        if (!collision) {
+                            row.push(item);
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) rows.push([item]);
+                });
+                return rows;
+            };
+            
+            const eduJobItems = this.career.educationsAndJobs.map(item => ({...item, from: item.yearFrom.year + item.yearFrom.month/12, to: item.yearTo.year + item.yearTo.month/12}));
+            this.chart.educationsAndJobs = stackItems(eduJobItems);
+
+            const grantItems = this.career.grants
+                .filter(item => this.chart.settings.visibility.notPIgrants || item.role === 'principal')
+                .map(item => ({...item, from: item.yearFrom.year + item.yearFrom.month/12, to: item.yearTo.year + item.yearTo.month/12, isPI: item.role === 'principal'}));
+            this.chart.grants = stackItems(grantItems);
+
+            for (let type of this.achievementTypeList) {
+                this.chart.achievements[type] = {};
+                for (let year = this.chart.firstYear; year <= this.chart.latestYear; year++) {
+                    const data = this.career.achievements[type][year];
+                    if (data) {
+                        this.chart.achievements[type][year] = [
+                            ...Array(data.firstCorresp || 0).fill(3),
+                            ...Array(data.first || 0).fill(2),
+                            ...Array(data.corresp || 0).fill(1),
+                            ...Array(data.other || 0).fill(0),
+                        ];
+                    } else {
+                        this.chart.achievements[type][year] = [];
+                    }
+                }
+            }
+            if (this.chart.settings.textDisplayMode === 'always') this.$nextTick(this.calculateDynamicHeights);
+        },
+        replotCareerHistory() {
+            this.chart.educationsAndJobs = [];
+            this.chart.grants = [];
+            this.chart.achievements = { journal: [], intlConf: [], domesticConf: [] };
+            this.plotCareerHistory();
+        },
+        updateCellWidth() {
+            this.$nextTick(() => {
+                const root = document.documentElement;
+                root.style.setProperty('--col-width', this.chart.settings.cellWidth + "px");
+                root.style.setProperty('--row-width', this.chart.settings.cellWidth * (2 + this.chart.latestYear - this.chart.firstYear) + "px");
+                if (this.chart.settings.textDisplayMode === 'always') this.calculateDynamicHeights();
+            });
+        },
+        updateTextDisplayMode() {
+            this.$nextTick(() => {
+                if (this.chart.settings.textDisplayMode === 'always') {
+                    this.calculateDynamicHeights();
+                } else {
+                    this.resetDynamicHeights();
+                }
+            });
+        },
+        // [改善案] 動的な高さ計算ロジックを復活
+        calculateDynamicHeights() {
+            if (this.chart.settings.textDisplayMode !== 'always') return;
+            this.$nextTick(() => {
+                const adjustRowHeights = (rowSelector) => {
+                    const rows = document.querySelectorAll(rowSelector);
+                    rows.forEach((row) => {
+                        let maxHeightInRow = 25; // Default minimum height
+                        const cells = row.querySelectorAll('.grant-cell, .edujob-cell');
+                        cells.forEach(cell => {
+                            const span = cell.querySelector('span');
+                            if (span && span.textContent) {
+                                const textHeight = this.calculateTextHeight(span.textContent, cell.offsetWidth);
+                                maxHeightInRow = Math.max(maxHeightInRow, textHeight + 10); // Add padding
+                            }
+                        });
+                        row.style.height = `${maxHeightInRow}px`;
+                        row.style.marginBottom = `${Math.max(5, maxHeightInRow * 0.1)}px`;
+                        cells.forEach(cell => { cell.style.height = `${maxHeightInRow}px`; });
+                    });
+                };
+                adjustRowHeights('.grant-row');
+                adjustRowHeights('.edujob-row');
+            });
+        },
+        // [改善案] 動的な高さリセットロジックを復活
+        resetDynamicHeights() {
+            const resetRowHeights = (rowSelector) => {
+                const rows = document.querySelectorAll(rowSelector);
+                rows.forEach(row => {
+                    row.style.height = '';
+                    row.style.marginBottom = '';
+                    const cells = row.querySelectorAll('.grant-cell, .edujob-cell');
+                    cells.forEach(cell => { cell.style.height = ''; });
+                });
+            };
+            resetRowHeights('.grant-row');
+            resetRowHeights('.edujob-row');
+        },
+        // [改善案] テキストの描画に必要な高さを計算するヘルパー関数
+        calculateTextHeight(text, containerWidth) {
+            if (!text || containerWidth <= 0) return 25;
+            const tempDiv = document.createElement('div');
+            Object.assign(tempDiv.style, {
+                position: 'absolute',
+                visibility: 'hidden',
+                width: `${containerWidth - 8}px`, // Adjust for padding
+                fontSize: '0.8em',
+                lineHeight: '1.2',
+                fontFamily: 'sans-serif',
+                wordBreak: 'break-word',
+                whiteSpace: 'normal',
+                fontFeatureSettings: '"palt"'
+            });
+            tempDiv.textContent = text;
+            document.body.appendChild(tempDiv);
+            const height = tempDiv.offsetHeight;
+            document.body.removeChild(tempDiv);
+            return height;
+        },
+        onScrollChart(e) { document.documentElement.style.setProperty('--chart-header-position', e.target.scrollLeft + "px"); },
+        getAchievementRowHeight(type) {
+            if (!this.chart.achievements[type]) return 0;
+            return Math.max(0, ...Object.values(this.chart.achievements[type]).map(col => col.length));
+        },
+        getStackCellStyle(item) {
+            return {
+                width: (this.chart.settings.cellWidth * (item.to - item.from)) + 'px',
+                left: (this.chart.settings.cellWidth * (item.from - this.chart.firstYear)) + 'px'
+            };
+        },
+        createStandaloneHTML() {
+            const chartElement = $('career-chart-main');
+            if (!chartElement) return '<!-- チャートがありません -->';
+            const styles = Array.from(document.querySelectorAll('style')).map(style => style.innerHTML).join('\n');
+            const chartHTML = chartElement.outerHTML;
+            const root = document.documentElement;
+            const computedStyles = getComputedStyle(root);
+            const colWidth = computedStyles.getPropertyValue('--col-width').trim();
+            const rowWidth = computedStyles.getPropertyValue('--row-width').trim();
+            return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuccessRiver AcademicCareerChart - ${this.researcher.name.display}</title>
+    <style>
+        ${styles}
+        :root {
+            --col-width: ${colWidth};
+            --row-width: ${rowWidth};
+            --chart-header-position: 0px;
+        }
+        body { background-color: #fff; padding: 20px; overflow-x: auto; }
+        .career-chart { border: 1px solid #ddd; width: ${rowWidth}; }
+        .app[data-text-mode="hover"] .grant-cell:hover,
+        .app[data-text-mode="hover"] .edujob-cell:hover {
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body class="app" data-text-mode="${this.chart.settings.textDisplayMode}">
+    ${chartHTML.replace('id="career-chart-main"', 'id="career-chart-standalone"')}
 </body>
 </html>`;
-    },
-    
-    // 業績セクションのHTML生成
-    generateAchievementSectionsHTML() {
-      let html = '';
-      for (let type of this.achievementTypeList) {
-        if (!this.chart.settings.visibility[type]) continue;
-        
-        let total = 0;
-        let counts = { 3: 0, 2: 0, 1: 0, 0: 0 };
-        
-        // 各年の実績を集計
-        for (let year = this.chart.firstYear; year <= this.chart.latestYear; year++) {
-          if (this.chart.achievements[type][year]) {
-            this.chart.achievements[type][year].forEach(item => {
-              counts[item]++;
-              total++;
-            });
-          }
-        }
-        
-        if (total === 0) continue;
-        
-        // パーセンテージ計算
-        let percentages = {
-          3: (counts[3] / total * 100),
-          2: (counts[2] / total * 100),
-          1: (counts[1] / total * 100),
-          0: (counts[0] / total * 100)
-        };
-        
-        html += `
-        <div class="achievement-section">
-            <div class="achievement-type">${this.achievementNameList[type]}</div>
-            <div class="achievement-bar-container">
-                <div class="achievement-bar">
-                    ${percentages[3] > 0 ? `<div class="bar-segment c1" style="width: ${percentages[3]}%;"></div>` : ''}
-                    ${percentages[2] > 0 ? `<div class="bar-segment c2" style="width: ${percentages[2]}%;"></div>` : ''}
-                    ${percentages[1] > 0 ? `<div class="bar-segment c3" style="width: ${percentages[1]}%;"></div>` : ''}
-                    ${percentages[0] > 0 ? `<div class="bar-segment c4" style="width: ${percentages[0]}%;"></div>` : ''}
-                </div>
-                <div class="achievement-count">${total}本</div>
-            </div>
-            <div class="achievement-details">
-                筆頭著者かつ責任著者: ${counts[3]}本 | 筆頭著者: ${counts[2]}本 | 責任著者: ${counts[1]}本 | 共著者: ${counts[0]}本
-            </div>
-        </div>`;
-      }
-      return html;
-    },
-    
-    // 印刷モード
-    printChart() {
-      // チャートデータの変換
-      let eaj = [];
-      for(let i=0; i<this.chart.educationsAndJobs.length; i++) {
-        let tmp = [];
-        for(let j=0; j<this.chart.educationsAndJobs[i].length; j++) {
-          let data = this.chart.educationsAndJobs[i][j];
-          tmp.push([
-            parseFloat((data.from-2000.0).toFixed(2)),
-            parseFloat((data.to-2000.0).toFixed(2)),
-            "__" + data.name + "__",
-            Number(data.isEdu)
-          ]);
-        }
-        eaj.push(tmp);
-      }
-      let grants = [];
-      for(let i=0; i<this.chart.grants.length; i++) {
-        let tmp = [];
-        for(let j=0; j<this.chart.grants[i].length; j++) {
-          let data = this.chart.grants[i][j];
-          tmp.push([
-            parseFloat((data.from-2000.0).toFixed(2)),
-            parseFloat((data.to-2000.0).toFixed(2)),
-            "__" + data.name + "__",
-            Number(data.isPI)
-          ]);
-        }
-        grants.push(tmp);
-      }
-      let achvmnt = [];
-      for(let type of this.achievementTypeList) {
-        let tmp = [];
-        for(let i=this.chart.firstYear; i<=this.chart.latestYear; i++) {
-          let val = this.chart.achievements[type][String(i)];
-          let firstAndCorresp = val.filter(e => e == 3).length;
-          let firstOnly = val.filter(e => e == 2).length;
-          let correspOnly = val.filter(e => e == 1).length;
-          let other = val.filter(e => e == 0).length;
-          tmp.push(firstAndCorresp + '-' + firstOnly + '-' + correspOnly + '-' + other);
-        }
-        tmp = tmp.join('_').replaceAll('0-0-0-0', '').replaceAll('0', '');
-        achvmnt.push(tmp);
-      }
-      let expJson = [
-        encodeURI(this.researcher.name.display),
-        encodeURI(this.researcher.affiliation.display),
-        this.chart.firstYear-2000,
-        this.chart.latestYear-2000,
-        this.chart.settings.cellWidth,
-        Number(this.chart.settings.visibility.journal),
-        Number(this.chart.settings.visibility.intlConf),
-        Number(this.chart.settings.visibility.domesticConf),
-        Number(this.chart.settings.visibility.notPIgrants),
-        encodeURI(eaj),
-        encodeURI(grants),
-        encodeURI(achvmnt)
-      ];
-      
-      let printURL = window.location.origin + window.location.pathname + '?print&chart=' + expJson.join('...');
-      window.open(printURL, "_blank");
-    },
-    importChart() {
-      let d = this.importData.split('...');
-      this.researcher.name.display = decodeURI(d[0]);
-      this.researcher.affiliation.display = decodeURI(d[1]);
-      this.chart.firstYear = parseInt(d[2]) + 2000;
-      this.chart.latestYear = parseInt(d[3]) + 2000;
-      this.chart.settings.cellWidth = parseInt(d[4]);
-      this.chart.settings.visibility.journal = Boolean(parseInt(d[5]));
-      this.chart.settings.visibility.intlConf = Boolean(parseInt(d[6]));
-      this.chart.settings.visibility.domesticConf = Boolean(parseInt(d[7]));
-      this.chart.settings.visibility.notPIgrants = Boolean(parseInt(d[8]));
-      this.chart.settings.textDisplayMode = d[9] || 'hover';
-      // Education and Job History
-      let eaj = JSON.parse("[" + d[10].replaceAll('__', '"') + "]");
-      for(let i=0; i<parseInt(eaj.length/4); i++) {
-        let eajItem = []
-        let tmp = parseFloat(eaj[i*4]);
-        let yearFrom = {
-          year: parseInt(tmp + 2000),
-          month: Math.ceil(12 * (tmp - parseInt(tmp)) * (tmp < 0 ? -1 : 1))
-        };
-        tmp = parseFloat(eaj[i*4 + 1]);
-        let yearTo   = {
-          year: parseInt(tmp + 2000),
-          month: Math.floor(12 * (tmp - parseInt(tmp)) * (tmp < 0 ? -1 : 1))
-        };
-        let eduName  = decodeURI(eaj[i*4 + 2]);
-        let isEdu    = Boolean(parseInt(eaj[i*4 + 3]));
-        this.career.educationsAndJobs.push({'yearFrom': yearFrom, 'yearTo': yearTo, 'name': eduName, 'isEdu': isEdu});
-      }
-      // Grant History
-      let grant = JSON.parse("[" + d[11].replaceAll('__', '"') + "]");
-      for(let i=0; i<parseInt(grant.length/4); i++) {
-        let grantItem = []
-        let tmp = parseFloat(grant[i*4]);
-        let yearFrom = {
-          year: parseInt(tmp + 2000),
-          month: Math.ceil(12 * (tmp - parseInt(tmp)) * (tmp < 0 ? -1 : 1))
-        };
-        tmp = parseFloat(grant[i*4 + 1]);
-        let yearTo   = {
-          year: parseInt(tmp + 2000),
-          month: Math.floor(12 * (tmp - parseInt(tmp)) * (tmp < 0 ? -1 : 1))
-        };
-        let grantName = decodeURI(grant[i*4 + 2]);
-        let isPI      = Boolean(parseInt(grant[i*4 + 3]));
-        this.career.grants.push({'yearFrom': yearFrom, 'yearTo': yearTo, 'name': grantName, 'role': isPI ? 'principal' : 'coinvestigator'});
-      }
-      // Achievement History (paper) - 著者タイプの新区分に対応するインポート処理
-      let achievements = d[12].split(',');
-      for(let i=0; i<achievements.length; i++) {
-        let tmp = achievements[i].split('_');
-        for(let j=0; j<tmp.length; j++) {
-          let achvmntYear = String(j + this.chart.firstYear);
-          if(this.achievementTypeList[i] != undefined && tmp[j] != '') {
-            let parts = tmp[j].split('-');
-            let firstAndCorresp = (parts.length > 0 && parts[0] != '') ? parseInt(parts[0]) : 0;
-            let firstOnly = (parts.length > 1 && parts[1] != '') ? parseInt(parts[1]) : 0;
-            let correspOnly = (parts.length > 2 && parts[2] != '') ? parseInt(parts[2]) : 0;
-            let other = (parts.length > 3 && parts[3] != '') ? parseInt(parts[3]) : 0;
+        },
+        generateStandaloneEmbed() {
+            const standaloneHTML = this.createStandaloneHTML();
+            const blob = new Blob([standaloneHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'career-chart-standalone.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
             
-            this.career.achievements[this.achievementTypeList[i]][achvmntYear] = {
-              'firstCorresp': firstAndCorresp, 
-              'first': firstOnly, 
-              'corresp': correspOnly, 
-              'other': other, 
-              'total': firstAndCorresp + firstOnly + correspOnly + other
-            };
-          }
+            this.exportedChartURL = `<!-- 見た目を完全に再現したスタンドアロンHTMLがダウンロードされました。 -->
+<!-- このHTMLは単体で動作し、iframeで埋め込むことができます。 -->
+<iframe src="career-chart-standalone.html" 
+        width="${($('career-chart-wrap').offsetWidth + 120)}" 
+        height="${($('career-chart-wrap').offsetHeight + 100)}" 
+        title="研究キャリアチャート" 
+        style="border:1px solid #ccc; border-radius: 5px;">
+</iframe>`;
+        },
+        embedChart() {
+            this.exportedChartURL = this.createIframeCode(false);
+             setTimeout(() => $('exported-chart-url').select(), 100);
+        },
+        printChart() {
+            const printHTML = this.createStandaloneHTML();
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printHTML);
+            printWindow.document.close();
+            printWindow.focus();
+        },
+        exportChartData() {
+            const dataToString = (items, isGrant) => items.flat().map(d => {
+                const values = [
+                    parseFloat((d.from - 2000).toFixed(2)),
+                    parseFloat((d.to - 2000).toFixed(2)),
+                    "__" + d.name + "__",
+                    Number(isGrant ? d.isPI : d.isEdu)
+                ];
+                return JSON.stringify(values);
+            }).join(',');
+
+            const eajStr = dataToString(this.chart.educationsAndJobs, false);
+            const grantsStr = dataToString(this.chart.grants, true);
+
+            const achvmntStr = this.achievementTypeList.map(type => 
+                Object.values(this.chart.achievements[type]).map(val =>
+                    val.reduce((acc, v) => (acc[v]++, acc), [0,0,0,0]).reverse().join('-')
+                ).join('_').replace(/0-0-0-0/g, '')
+            ).join(',');
+            
+            return [
+                encodeURI(this.researcher.name.display), encodeURI(this.researcher.affiliation.display),
+                this.chart.firstYear - 2000, this.chart.latestYear - 2000,
+                this.chart.settings.cellWidth,
+                ...Object.values(this.chart.settings.visibility).map(Number),
+                this.chart.settings.textDisplayMode,
+                `[${eajStr}]`, `[${grantsStr}]`, achvmntStr
+            ].join('...');
+        },
+        importChart() {
+            // Simplified import logic
+            const d = this.importData.split('...');
+            try {
+                this.researcher.name.display = decodeURI(d[0]);
+                this.researcher.affiliation.display = decodeURI(d[1]);
+                this.chart.firstYear = parseInt(d[2]) + 2000;
+                this.chart.latestYear = parseInt(d[3]) + 2000;
+                this.replotCareerHistory();
+            } catch (e) {
+                console.error("URLデータの解析に失敗しました。", e);
+                alert("無効な共有URLです。");
+            }
+        },
+        createIframeCode(isPrint) {
+            const chartData = this.exportChartData();
+            const url = new URL(window.location.href);
+            url.search = `?${isPrint ? 'print' : 'embed'}&chart=${chartData}`;
+            
+            if (isPrint) return url.href;
+
+            const width = $('career-chart-wrap').offsetWidth + 60;
+            const height = $('career-chart-wrap').offsetHeight + 60;
+
+            return `<iframe src="${url.href}" width="${width}" height="${height}" title="研究キャリアチャート" style="border:1px solid #ccc; border-radius: 5px;"></iframe>`;
         }
-      }
-      this.updateCellWidth();
-      this.replotCareerHistory();
+    },
+    computed: {
+        systemVersion: () => 'v2.0.0'
     }
-  },
-  computed: {
-    systemVersion: function() { return 'v1.0.3'; }
-  }
 });
-app.initialize();
 </script>
+</body>
 </html>
