@@ -143,17 +143,17 @@
         .export-chart ul { padding: 0; margin: 10px 0; }
         .export-chart ul li {
             display: inline-block; color: white; margin: 10px 5px 5px 0;
-            padding: 5px 10px; border-radius: 5px; font-size: 0.9em; cursor: pointer;
+            padding: 8px 15px; border-radius: 5px; font-size: 0.9em; cursor: pointer;
             transition: opacity 0.2s;
         }
         .export-chart ul li:hover { opacity: 0.7; }
-        .embed-chart { background: #339; }
         .generate-standalone { background: #6c5ce7; }
-        .print-chart { background: #393; }
+        .show-embed-instructions { background: #0984e3; }
+        .print-chart { background: #00b894; }
         .export-chart textarea {
-            border: 1px solid #ccc; height: 80px; width: 100%; padding: 10px;
-            line-height: 1.4; background: #f5f5f5; border-radius: 5px;
-            white-space: pre; font-family: monospace;
+            border: 1px solid #ccc; height: 120px; width: 100%; padding: 10px;
+            line-height: 1.5; background: #f5f5f5; border-radius: 5px;
+            white-space: pre-wrap; font-family: monospace;
         }
         
         /* --- Footer --- */
@@ -178,7 +178,6 @@
         .app.print .career-chart-container { padding: 0px; }
         .app.print .career-chart { width: 100%; border: none; overflow: visible; }
         
-        /* --- 印刷用スタイル --- */
         @media print {
             body, html {
                 width: 100%;
@@ -187,12 +186,9 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-
-            /* 印刷時にUIを確実に非表示 */
             header, footer, .file-select-container, .chart-setting-container, .career-chart-container h2, .export-chart {
                 display: none !important;
             }
-
             .career-chart-container {
                 padding: 0 !important;
                 margin: 0 !important;
@@ -203,14 +199,10 @@
                 overflow: visible !important;
                 box-shadow: none !important;
             }
-
-            /* 全ての要素で色を強制的に印刷 */
             .achievement-cell, .grant-cell, .edujob-cell, .year-cell, .legend-color {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-
-            /* ホバーエフェクトを無効化 */
             .app[data-text-mode="hover"] .grant-cell:hover,
             .app[data-text-mode="hover"] .edujob-cell:hover {
                 z-index: 2;
@@ -218,7 +210,6 @@
                 background-color: transparent;
                 box-shadow: none;
             }
-
             .app[data-text-mode="hover"] .grant-cell:hover span,
             .app[data-text-mode="hover"] .edujob-cell:hover span {
                 position: static;
@@ -356,8 +347,8 @@
 
         <nav class="export-chart" v-if="chart.latestYear">
             <ul>
-                <li class="generate-standalone" @click="generateStandaloneEmbed">スタンドアロンHTMLを生成</li>
-                <li class="embed-chart" @click="embedChart">埋め込みコード(iframe)</li>
+                <li class="generate-standalone" @click="generateStandaloneHTML">HTMLを保存</li>
+                <li class="show-embed-instructions" @click="showEmbedInstructions">埋め込み方法を表示</li>
                 <li class="print-chart" @click="printChart">印刷プレビュー</li>
             </ul>
             <textarea id="exported-chart-url" readonly @focus="$event.target.select()">${ exportedChartURL }</textarea>
@@ -424,8 +415,7 @@ var app = new Vue({
         },
         achievementTypeList: ['journal', 'intlConf', 'domesticConf'],
         achievementNameList: {'journal': '論文誌・ジャーナル', 'intlConf': '国際会議プロシーディングス', 'domesticConf': '国内研究会・シンポジウム'},
-        exportedChartURL: '',
-        importData: '',
+        exportedChartURL: 'チャートを生成後、ここにコードや説明が表示されます。',
     },
     created: function() {
         this.initialize();
@@ -433,12 +423,8 @@ var app = new Vue({
     methods: {
         initialize() {
             const params = new URLSearchParams(window.location.search);
-            if(params.has('embed')) this.isEmbeddingMode = true;
-            if(params.has('print')) this.isPrintingMode = true;
-            if(params.has('chart')) {
-                this.isSharingMode = true;
-                this.importData = params.get('chart');
-                this.importChart();
+            if(params.has('embed') || params.has('print')) {
+                this.isEmbeddingMode = true;
             }
         },
         selectrmFile(e) {
@@ -454,11 +440,9 @@ var app = new Vue({
             };
         },
         parseCareerHistory() {
-            // Reset data
             this.career = { educationsAndJobs: [], grants: [], achievements: { journal: {total: 0}, intlConf: {total: 0}, domesticConf: {total: 0}, total: 0 } };
             this.chart.firstYear = new Date().getFullYear();
             this.chart.latestYear = 0;
-
             if('researchers' in this.rmJson) {
                 let r = this.rmJson.researchers[0];
                 this.researcher.name.ja = [r.family_name.ja + " " + r.given_name.ja, r.family_name.ja + r.given_name.ja];
@@ -466,7 +450,6 @@ var app = new Vue({
                 this.researcher.name.display = `${r.family_name.ja} ${r.given_name.ja} (${r.given_name.en} ${r.family_name.en})`;
                 this.researcher.affiliation.display = r.affiliations[0]?.affiliation.ja || '';
             }
-            // Education History
             (this.rmJson.education || []).forEach(edu => {
                 const yearFrom = this.getFinancialYear(edu.from_date);
                 const yearTo = this.getFinancialYear(edu.to_date);
@@ -474,7 +457,6 @@ var app = new Vue({
                 this.career.educationsAndJobs.push({yearFrom, yearTo, name: eduName, isEdu: true});
                 this.updateCareerPeriod(yearFrom.year, yearTo.year);
             });
-            // Job History
             (this.rmJson.research_experience || []).forEach(job => {
                 const yearFrom = this.getFinancialYear(job.from_date);
                 const yearTo = this.getFinancialYear(job.to_date);
@@ -482,7 +464,6 @@ var app = new Vue({
                 this.career.educationsAndJobs.push({yearFrom, yearTo, name: jobName, isEdu: false});
                 this.updateCareerPeriod(yearFrom.year, yearTo.year);
             });
-            // Grant History
             (this.rmJson.research_projects || []).forEach(grant => {
                 const yearFrom = this.getFinancialYear(grant.from_date);
                 const yearTo = this.getFinancialYear(grant.to_date);
@@ -491,20 +472,17 @@ var app = new Vue({
                 this.career.grants.push({yearFrom, yearTo, name: grantName, role: grantRole});
                 this.updateCareerPeriod(yearFrom.year, yearTo.year);
             });
-            // Achievement History
             (this.rmJson.published_papers || []).forEach(paper => {
                 if (!paper.published_paper_type) return;
                 const typeMap = { 'scientific_journal': 'journal', 'international_conference_proceedings': 'intlConf', 'symposium': 'domesticConf' };
                 const achvmntType = typeMap[paper.published_paper_type];
                 if (!achvmntType) return;
-                
                 let firstAuthorFlag = (paper.published_paper_owner_roles || []).includes('lead');
                 if (!firstAuthorFlag) {
                     const authorName = paper.authors?.en?.[0]?.name || paper.authors?.ja?.[0]?.name;
                     if (authorName) firstAuthorFlag = this.researcher.name.en.includes(authorName) || this.researcher.name.ja.includes(authorName);
                 }
                 const correspAuthorFlag = (paper.published_paper_owner_roles || []).includes('corresponding');
-                
                 const achvmntYear = this.getFinancialYear(paper.publication_date).year;
                 if (!this.career.achievements[achvmntType][achvmntYear]) {
                     this.career.achievements[achvmntType][achvmntYear] = {firstCorresp: 0, first: 0, corresp: 0, other: 0, total: 0};
@@ -518,9 +496,7 @@ var app = new Vue({
             });
         },
         getFinancialYear(targetDate, isFrom = true) {
-            if (!targetDate || targetDate === "9999") {
-                return { year: new Date().getFullYear() + 1, month: isFrom ? 4 : 3 };
-            }
+            if (!targetDate || targetDate === "9999") return { year: new Date().getFullYear() + 1, month: isFrom ? 4 : 3 };
             const dt = targetDate.split('-');
             const year = dt[0] ? parseInt(dt[0]) : new Date().getFullYear();
             const month = dt[1] ? parseInt(dt[1]) : isFrom ? 4 : 3;
@@ -533,7 +509,6 @@ var app = new Vue({
         getEduName: edu => [edu.affiliation?.ja, edu.department?.ja, edu.course?.ja].filter(Boolean).join(' ') || [edu.affiliation?.en, edu.department?.en, edu.course?.en].filter(Boolean).join(' ') || '学歴',
         getJobName: job => [job.affiliation?.ja, job.section?.ja, job.job?.ja].filter(Boolean).join(' ') || [job.affiliation?.en, job.section?.en, job.job?.en].filter(Boolean).join(' ') || '職歴',
         getGrantName: grant => [grant.offer_organization?.ja, grant.category?.ja, grant.system_name?.ja].filter(Boolean).join('・') || [grant.offer_organization?.en, grant.category?.en, grant.system_name?.en].filter(Boolean).join('・') || '研究費',
-        
         plotCareerHistory() {
             this.updateCellWidth();
             const stackItems = (items) => {
@@ -543,47 +518,32 @@ var app = new Vue({
                     let placed = false;
                     for (let row of rows) {
                         const collision = row.some(existing => item.from < existing.to && item.to > existing.from);
-                        if (!collision) {
-                            row.push(item);
-                            placed = true;
-                            break;
-                        }
+                        if (!collision) { row.push(item); placed = true; break; }
                     }
                     if (!placed) rows.push([item]);
                 });
                 return rows;
             };
-            
             const eduJobItems = this.career.educationsAndJobs.map(item => ({...item, from: item.yearFrom.year + item.yearFrom.month/12, to: item.yearTo.year + item.yearTo.month/12}));
             this.chart.educationsAndJobs = stackItems(eduJobItems);
-
             const grantItems = this.career.grants
                 .filter(item => this.chart.settings.visibility.notPIgrants || item.role === 'principal')
                 .map(item => ({...item, from: item.yearFrom.year + item.yearFrom.month/12, to: item.yearTo.year + item.yearTo.month/12, isPI: item.role === 'principal'}));
             this.chart.grants = stackItems(grantItems);
-
             for (let type of this.achievementTypeList) {
                 this.chart.achievements[type] = {};
                 for (let year = this.chart.firstYear; year <= this.chart.latestYear; year++) {
                     const data = this.career.achievements[type][year];
-                    if (data) {
-                        this.chart.achievements[type][year] = [
-                            ...Array(data.firstCorresp || 0).fill(3),
-                            ...Array(data.first || 0).fill(2),
-                            ...Array(data.corresp || 0).fill(1),
-                            ...Array(data.other || 0).fill(0),
-                        ];
-                    } else {
-                        this.chart.achievements[type][year] = [];
-                    }
+                    this.chart.achievements[type][year] = data ? [
+                        ...Array(data.firstCorresp || 0).fill(3), ...Array(data.first || 0).fill(2),
+                        ...Array(data.corresp || 0).fill(1), ...Array(data.other || 0).fill(0),
+                    ] : [];
                 }
             }
             if (this.chart.settings.textDisplayMode === 'always') this.$nextTick(this.calculateDynamicHeights);
         },
         replotCareerHistory() {
-            this.chart.educationsAndJobs = [];
-            this.chart.grants = [];
-            this.chart.achievements = { journal: [], intlConf: [], domesticConf: [] };
+            this.chart.educationsAndJobs = []; this.chart.grants = []; this.chart.achievements = { journal: [], intlConf: [], domesticConf: [] };
             this.plotCareerHistory();
         },
         updateCellWidth() {
@@ -596,27 +556,22 @@ var app = new Vue({
         },
         updateTextDisplayMode() {
             this.$nextTick(() => {
-                if (this.chart.settings.textDisplayMode === 'always') {
-                    this.calculateDynamicHeights();
-                } else {
-                    this.resetDynamicHeights();
-                }
+                if (this.chart.settings.textDisplayMode === 'always') this.calculateDynamicHeights();
+                else this.resetDynamicHeights();
             });
         },
-        // [改善案] 動的な高さ計算ロジックを復活
         calculateDynamicHeights() {
             if (this.chart.settings.textDisplayMode !== 'always') return;
             this.$nextTick(() => {
                 const adjustRowHeights = (rowSelector) => {
-                    const rows = document.querySelectorAll(rowSelector);
-                    rows.forEach((row) => {
-                        let maxHeightInRow = 25; // Default minimum height
+                    document.querySelectorAll(rowSelector).forEach((row) => {
+                        let maxHeightInRow = 25;
                         const cells = row.querySelectorAll('.grant-cell, .edujob-cell');
                         cells.forEach(cell => {
                             const span = cell.querySelector('span');
                             if (span && span.textContent) {
                                 const textHeight = this.calculateTextHeight(span.textContent, cell.offsetWidth);
-                                maxHeightInRow = Math.max(maxHeightInRow, textHeight + 10); // Add padding
+                                maxHeightInRow = Math.max(maxHeightInRow, textHeight + 10);
                             }
                         });
                         row.style.height = `${maxHeightInRow}px`;
@@ -628,34 +583,23 @@ var app = new Vue({
                 adjustRowHeights('.edujob-row');
             });
         },
-        // [改善案] 動的な高さリセットロジックを復活
         resetDynamicHeights() {
             const resetRowHeights = (rowSelector) => {
-                const rows = document.querySelectorAll(rowSelector);
-                rows.forEach(row => {
-                    row.style.height = '';
-                    row.style.marginBottom = '';
-                    const cells = row.querySelectorAll('.grant-cell, .edujob-cell');
-                    cells.forEach(cell => { cell.style.height = ''; });
+                document.querySelectorAll(rowSelector).forEach(row => {
+                    row.style.height = ''; row.style.marginBottom = '';
+                    row.querySelectorAll('.grant-cell, .edujob-cell').forEach(cell => { cell.style.height = ''; });
                 });
             };
             resetRowHeights('.grant-row');
             resetRowHeights('.edujob-row');
         },
-        // [改善案] テキストの描画に必要な高さを計算するヘルパー関数
         calculateTextHeight(text, containerWidth) {
             if (!text || containerWidth <= 0) return 25;
             const tempDiv = document.createElement('div');
             Object.assign(tempDiv.style, {
-                position: 'absolute',
-                visibility: 'hidden',
-                width: `${containerWidth - 8}px`, // Adjust for padding
-                fontSize: '0.8em',
-                lineHeight: '1.2',
-                fontFamily: 'sans-serif',
-                wordBreak: 'break-word',
-                whiteSpace: 'normal',
-                fontFeatureSettings: '"palt"'
+                position: 'absolute', visibility: 'hidden', width: `${containerWidth - 8}px`,
+                fontSize: '0.8em', lineHeight: '1.2', fontFamily: 'sans-serif',
+                wordBreak: 'break-word', whiteSpace: 'normal', fontFeatureSettings: '"palt"'
             });
             tempDiv.textContent = text;
             document.body.appendChild(tempDiv);
@@ -674,7 +618,8 @@ var app = new Vue({
                 left: (this.chart.settings.cellWidth * (item.from - this.chart.firstYear)) + 'px'
             };
         },
-        createStandaloneHTML() {
+        // スタンドアロンHTMLを生成
+        createStandaloneHTML(forPrint = false) {
             const chartElement = $('career-chart-main');
             if (!chartElement) return '<!-- チャートがありません -->';
             const styles = Array.from(document.querySelectorAll('style')).map(style => style.innerHTML).join('\n');
@@ -683,119 +628,64 @@ var app = new Vue({
             const computedStyles = getComputedStyle(root);
             const colWidth = computedStyles.getPropertyValue('--col-width').trim();
             const rowWidth = computedStyles.getPropertyValue('--row-width').trim();
+
+            const bodyClass = forPrint ? 'app print' : 'app';
+            const bodyStyle = forPrint ? '' : 'background-color: #fff; padding: 20px; overflow-x: auto;';
+            const chartStyle = forPrint ? '' : `border: 1px solid #ddd; width: ${rowWidth};`;
+            
             return `<!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuccessRiver AcademicCareerChart - ${this.researcher.name.display}</title>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${forPrint ? '印刷プレビュー' : 'スタンドアロン・キャリアチャート'} - ${this.researcher.name.display}</title>
     <style>
         ${styles}
-        :root {
-            --col-width: ${colWidth};
-            --row-width: ${rowWidth};
-            --chart-header-position: 0px;
-        }
-        body { background-color: #fff; padding: 20px; overflow-x: auto; }
-        .career-chart { border: 1px solid #ddd; width: ${rowWidth}; }
-        .app[data-text-mode="hover"] .grant-cell:hover,
-        .app[data-text-mode="hover"] .edujob-cell:hover {
-            background-color: #fff;
-        }
+        :root { --col-width: ${colWidth}; --row-width: ${rowWidth}; --chart-header-position: 0px; }
+        body { ${bodyStyle} }
+        .career-chart { ${chartStyle} }
+        .app[data-text-mode="hover"] .grant-cell:hover, .app[data-text-mode="hover"] .edujob-cell:hover { background-color: #fff; }
     </style>
 </head>
-<body class="app" data-text-mode="${this.chart.settings.textDisplayMode}">
+<body class="${bodyClass}" data-text-mode="${this.chart.settings.textDisplayMode}">
     ${chartHTML.replace('id="career-chart-main"', 'id="career-chart-standalone"')}
 </body>
 </html>`;
         },
-        generateStandaloneEmbed() {
-            const standaloneHTML = this.createStandaloneHTML();
+        // HTML保存ボタンの処理
+        generateStandaloneHTML() {
+            const standaloneHTML = this.createStandaloneHTML(false);
             const blob = new Blob([standaloneHTML], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'career-chart-standalone.html';
+            a.download = 'my-career-chart.html';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
-            this.exportedChartURL = `<!-- 見た目を完全に再現したスタンドアロンHTMLがダウンロードされました。 -->
-<!-- このHTMLは単体で動作し、iframeで埋め込むことができます。 -->
-<iframe src="career-chart-standalone.html" 
-        width="${($('career-chart-wrap').offsetWidth + 120)}" 
-        height="${($('career-chart-wrap').offsetHeight + 100)}" 
-        title="研究キャリアチャート" 
-        style="border:1px solid #ccc; border-radius: 5px;">
-</iframe>`;
+            this.exportedChartURL = `「my-career-chart.html」がダウンロードされました。\nこのファイルをサーバーにアップロードし、埋め込みに利用してください。`;
         },
-        embedChart() {
-            this.exportedChartURL = this.createIframeCode(false);
-             setTimeout(() => $('exported-chart-url').select(), 100);
+        // 埋め込み方法の表示
+        showEmbedInstructions() {
+            const chartWrap = $('career-chart-wrap');
+            const width = chartWrap ? chartWrap.offsetWidth + 120 : 800;
+            const height = chartWrap ? chartWrap.offsetHeight + 100 : 600;
+
+            this.exportedChartURL = `【埋め込み方法】
+1. 「HTMLを保存」ボタンを押し、「my-career-chart.html」をダウンロードします。
+2. ダウンロードしたファイルを、あなたのサイトのサーバーにアップロードします。
+3. あなたのサイトのHTMLに、以下のコードを貼り付けます。
+
+<iframe src="./my-career-chart.html" width="${width}" height="${height}" title="研究キャリアチャート" style="border:1px solid #ccc; border-radius: 5px;"></iframe>`;
         },
+        // [改善] 印刷プレビューの処理
         printChart() {
-            const printHTML = this.createStandaloneHTML();
+            const printHTML = this.createStandaloneHTML(true);
             const printWindow = window.open('', '_blank');
             printWindow.document.write(printHTML);
             printWindow.document.close();
             printWindow.focus();
         },
-        exportChartData() {
-            const dataToString = (items, isGrant) => items.flat().map(d => {
-                const values = [
-                    parseFloat((d.from - 2000).toFixed(2)),
-                    parseFloat((d.to - 2000).toFixed(2)),
-                    "__" + d.name + "__",
-                    Number(isGrant ? d.isPI : d.isEdu)
-                ];
-                return JSON.stringify(values);
-            }).join(',');
-
-            const eajStr = dataToString(this.chart.educationsAndJobs, false);
-            const grantsStr = dataToString(this.chart.grants, true);
-
-            const achvmntStr = this.achievementTypeList.map(type => 
-                Object.values(this.chart.achievements[type]).map(val =>
-                    val.reduce((acc, v) => (acc[v]++, acc), [0,0,0,0]).reverse().join('-')
-                ).join('_').replace(/0-0-0-0/g, '')
-            ).join(',');
-            
-            return [
-                encodeURI(this.researcher.name.display), encodeURI(this.researcher.affiliation.display),
-                this.chart.firstYear - 2000, this.chart.latestYear - 2000,
-                this.chart.settings.cellWidth,
-                ...Object.values(this.chart.settings.visibility).map(Number),
-                this.chart.settings.textDisplayMode,
-                `[${eajStr}]`, `[${grantsStr}]`, achvmntStr
-            ].join('...');
-        },
-        importChart() {
-            // Simplified import logic
-            const d = this.importData.split('...');
-            try {
-                this.researcher.name.display = decodeURI(d[0]);
-                this.researcher.affiliation.display = decodeURI(d[1]);
-                this.chart.firstYear = parseInt(d[2]) + 2000;
-                this.chart.latestYear = parseInt(d[3]) + 2000;
-                this.replotCareerHistory();
-            } catch (e) {
-                console.error("URLデータの解析に失敗しました。", e);
-                alert("無効な共有URLです。");
-            }
-        },
-        createIframeCode(isPrint) {
-            const chartData = this.exportChartData();
-            const url = new URL(window.location.href);
-            url.search = `?${isPrint ? 'print' : 'embed'}&chart=${chartData}`;
-            
-            if (isPrint) return url.href;
-
-            const width = $('career-chart-wrap').offsetWidth + 60;
-            const height = $('career-chart-wrap').offsetHeight + 60;
-
-            return `<iframe src="${url.href}" width="${width}" height="${height}" title="研究キャリアチャート" style="border:1px solid #ccc; border-radius: 5px;"></iframe>`;
-        }
     },
     computed: {
         systemVersion: () => 'v2.0.0'
